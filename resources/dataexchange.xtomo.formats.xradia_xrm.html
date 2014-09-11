@@ -1,0 +1,330 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataexchange.xtomo.formats.xradia_xrm module &mdash; Data Exchange 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="top" title="Data Exchange 0.2 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">Data Exchange 0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-dataexchange.xtomo.formats.xradia_xrm">
+<span id="dataexchange-xtomo-formats-xradia-xrm-module"></span><h1>dataexchange.xtomo.formats.xradia_xrm module<a class="headerlink" href="#module-dataexchange.xtomo.formats.xradia_xrm" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO">
+<em class="property">class </em><tt class="descclassname">dataexchange.xtomo.formats.xradia_xrm.</tt><tt class="descname">OleFileIO</tt><big>(</big><em>filename=None</em>, <em>raise_defects=40</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO" title="Permalink to this definition">¶</a></dt>
+<dd><p>OLE container object</p>
+<p>This class encapsulates the interface to an OLE 2 structured
+storage file.  Use the <a class="reference external" href="mailto:{&#37;&#52;&#48;link">{<span>&#64;</span>link</a> listdir} and <a class="reference external" href="mailto:{&#37;&#52;&#48;link">{<span>&#64;</span>link</a> openstream} methods to
+access the contents of this file.</p>
+<p>Object names are given as a list of strings, one for each subentry
+level.  The root entry should be omitted.  For example, the following
+code extracts all image streams from a Microsoft Image Composer file:</p>
+<blockquote>
+<div><p>ole = OleFileIO(&#8220;fan.mic&#8221;)</p>
+<dl class="docutils">
+<dt>for entry in ole.listdir():</dt>
+<dd><dl class="first last docutils">
+<dt>if entry[1:2] == &#8220;Image&#8221;:</dt>
+<dd><p class="first">fin = ole.openstream(entry)
+fout = open(entry[0:1], &#8220;wb&#8221;)
+while 1:</p>
+<blockquote class="last">
+<div><p>s = fin.read(8192)
+if not s:</p>
+<blockquote>
+<div>break</div></blockquote>
+<p>fout.write(s)</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+<p>You can use the viewer application provided with the Python Imaging
+Library to view the resulting files (which happens to be standard
+TIFF files).</p>
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.close">
+<tt class="descname">close</tt><big>(</big><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close an OLE2 file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.dumpdirectory">
+<tt class="descname">dumpdirectory</tt><big>(</big><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.dumpdirectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dump directory (for debugging only)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.dumpfat">
+<tt class="descname">dumpfat</tt><big>(</big><em>fat</em>, <em>firstindex=0</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.dumpfat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays a part of FAT in human-readable form for debugging purpose</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.dumpsect">
+<tt class="descname">dumpsect</tt><big>(</big><em>sector</em>, <em>firstindex=0</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.dumpsect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays a sector in a human-readable form, for debugging purpose.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.exists">
+<tt class="descname">exists</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if given filename exists as a stream or a storage in the OLE
+container.</p>
+<p>filename: path of stream in storage tree. (see openstream for syntax)
+return: True if object exist, else False.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.get_rootentry_name">
+<tt class="descname">get_rootentry_name</tt><big>(</big><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.get_rootentry_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return root entry name. Should usually be &#8216;Root Entry&#8217; or &#8216;R&#8217; in most
+implementations.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.get_size">
+<tt class="descname">get_size</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.get_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return size of a stream in the OLE container, in bytes.</p>
+<p>filename: path of stream in storage tree (see openstream for syntax)
+return: size in bytes (long integer)
+raise: IOError if file not found, TypeError if this is not a stream.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.get_type">
+<tt class="descname">get_type</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.get_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if given filename exists as a stream or a storage in the OLE
+container, and return its type.</p>
+<p>filename: path of stream in storage tree. (see openstream for syntax)
+return: False if object does not exist, its entry type (&gt;0) otherwise:</p>
+<blockquote>
+<div><ul class="simple">
+<li>STGTY_STREAM: a stream</li>
+<li>STGTY_STORAGE: a storage</li>
+<li>STGTY_ROOT: the root entry</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.getproperties">
+<tt class="descname">getproperties</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.getproperties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return properties described in substream.</p>
+<p>filename: path of stream in storage tree (see openstream for syntax)
+return: a dictionary of values indexed by id (integer)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.getsect">
+<tt class="descname">getsect</tt><big>(</big><em>sect</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.getsect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read given sector from file on disk.
+sect: sector index
+returns a string containing the sector data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.listdir">
+<tt class="descname">listdir</tt><big>(</big><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.listdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of streams stored in this file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.loaddirectory">
+<tt class="descname">loaddirectory</tt><big>(</big><em>sect</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.loaddirectory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the directory.
+sect: sector index of directory stream.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.loadfat">
+<tt class="descname">loadfat</tt><big>(</big><em>header</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.loadfat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the FAT table.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.loadfat_sect">
+<tt class="descname">loadfat_sect</tt><big>(</big><em>sect</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.loadfat_sect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds the indexes of the given sector to the FAT
+sect: string containing the first FAT sector, or array of long integers
+return: index of last FAT sector.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.loadminifat">
+<tt class="descname">loadminifat</tt><big>(</big><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.loadminifat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the MiniFAT table.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.open">
+<tt class="descname">open</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open an OLE2 file.
+Reads the header, FAT and directory.</p>
+<p>filename: string-like or file-like object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.openstream">
+<tt class="descname">openstream</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.openstream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open a stream as a read-only file object (StringIO).</p>
+<dl class="docutils">
+<dt>filename: path of stream in storage tree (except root entry), either:</dt>
+<dd><ul class="first last simple">
+<li>a string using Unix path syntax, for example:
+&#8216;storage_1/storage_1.2/stream&#8217;</li>
+<li>a list of storage filenames, path to the desired stream/storage.
+Example: [&#8216;storage_1&#8217;, &#8216;storage_1.2&#8217;, &#8216;stream&#8217;]</li>
+</ul>
+</dd>
+</dl>
+<p>return: file object (read-only)
+raise IOError if filename not found, or if this is not a stream.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.OleFileIO.sect2array">
+<tt class="descname">sect2array</tt><big>(</big><em>sect</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.OleFileIO.sect2array" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert a sector to an array of 32 bits unsigned integers,
+swapping bytes on big endian CPUs such as PowerPC (old Macs)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.i16">
+<tt class="descclassname">dataexchange.xtomo.formats.xradia_xrm.</tt><tt class="descname">i16</tt><big>(</big><em>c</em>, <em>o=0</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.i16" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a 2-bytes (16 bits) string to an integer.</p>
+<p>c: string containing bytes to convert
+o: offset of bytes to convert in string</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.i32">
+<tt class="descclassname">dataexchange.xtomo.formats.xradia_xrm.</tt><tt class="descname">i32</tt><big>(</big><em>c</em>, <em>o=0</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.i32" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a 4-bytes (32 bits) string to an integer.</p>
+<p>c: string containing bytes to convert
+o: offset of bytes to convert in string</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.isOleFile">
+<tt class="descclassname">dataexchange.xtomo.formats.xradia_xrm.</tt><tt class="descname">isOleFile</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.isOleFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if file is an OLE container (according to its header).
+filename: file name or path (str, unicode)
+return: True if OLE, False otherwise.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.xrm">
+<em class="property">class </em><tt class="descclassname">dataexchange.xtomo.formats.xradia_xrm.</tt><tt class="descname">xrm</tt><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.xrm" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.xrm.read_txrm">
+<tt class="descname">read_txrm</tt><big>(</big><em>filename</em>, <em>ds</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.xrm.read_txrm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.xrm.read_xrm">
+<tt class="descname">read_xrm</tt><big>(</big><em>filename</em>, <em>ds</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.xrm.read_xrm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.xrm.read_xrm_fileinfo">
+<tt class="descname">read_xrm_fileinfo</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.xrm.read_xrm_fileinfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.formats.xradia_xrm.xrm.read_xrm_list">
+<tt class="descname">read_xrm_list</tt><big>(</big><em>filelist</em>, <em>filepath</em>, <em>ds</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.xradia_xrm.xrm.read_xrm_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/resources/dataexchange.xtomo.formats.xradia_xrm.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">Data Exchange 0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Argonne National Laboratory.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
