@@ -58,12 +58,26 @@
             
   <div class="section" id="module-dataexchange.xtomo.xtomo_exporter">
 <span id="xtomo-exporter"></span><h1>xtomo_exporter<a class="headerlink" href="#module-dataexchange.xtomo.xtomo_exporter" title="Permalink to this headline">¶</a></h1>
+<p>Write tomographic image data in various format files.</p>
+<p>Supported image fomats include HDF5 Data Exchange and TIFF.</p>
+<span class="target" id="module-xtomo_exporter.py"></span><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Author:</th><td class="field-body"><a class="reference external" href="mailto:decarlof&#37;&#52;&#48;gmail&#46;com">Francesco De Carlo</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Organization:</th><td class="field-body">Argonne National Laboratory, Argonne, IL 60439 USA</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Version:</th><td class="field-body">2014.08.15</td>
+</tr>
+</tbody>
+</table>
 <dl class="class">
 <dt id="dataexchange.xtomo.xtomo_exporter.Export">
-<em class="property">class </em><tt class="descclassname">dataexchange.xtomo.xtomo_exporter.</tt><tt class="descname">Export</tt><big>(</big><em>data=None</em>, <em>data_white=None</em>, <em>data_dark=None</em>, <em>theta=None</em>, <em>hdf5_file_name=None</em>, <em>data_exchange_type=None</em>, <em>sample_name=None</em>, <em>logger=None</em>, <em>log='INFO'</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.xtomo_exporter.Export" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">dataexchange.xtomo.xtomo_exporter.</tt><tt class="descname">Export</tt><big>(</big><em>data=None</em>, <em>data_white=None</em>, <em>data_dark=None</em>, <em>theta=None</em>, <em>hdf5_file_name=None</em>, <em>data_exchange_type=None</em>, <em>sample_name=None</em>, <em>logger=None</em>, <em>log='INFO'</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_exporter.html#Export"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_exporter.Export" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="dataexchange.xtomo.xtomo_exporter.Export.xtomo_exchange">
-<tt class="descname">xtomo_exchange</tt><big>(</big><em>data</em>, <em>data_white=None</em>, <em>data_dark=None</em>, <em>theta=None</em>, <em>sample_name=None</em>, <em>data_exchange_type=None</em>, <em>hdf5_file_name=None</em>, <em>log='INFO'</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.xtomo_exporter.Export.xtomo_exchange" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">xtomo_exchange</tt><big>(</big><em>data</em>, <em>data_white=None</em>, <em>data_dark=None</em>, <em>theta=None</em>, <em>sample_name=None</em>, <em>data_exchange_type=None</em>, <em>hdf5_file_name=None</em>, <em>log='INFO'</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_exporter.html#Export.xtomo_exchange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_exporter.Export.xtomo_exchange" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write 3-D data to a data-exchange file.</p>
 <dl class="docutils">
 <dt>data <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
@@ -143,7 +157,7 @@ for raw data tomography data use &#8216;tomography_raw_projections&#8217;</dd>
 
 <dl class="method">
 <dt id="dataexchange.xtomo.xtomo_exporter.Export.xtomo_tiff">
-<tt class="descname">xtomo_tiff</tt><big>(</big><em>data</em>, <em>output_file=None</em>, <em>x_start=0</em>, <em>digits=5</em>, <em>axis=0</em>, <em>overwrite=False</em>, <em>delete=False</em>, <em>dtype='float32'</em>, <em>data_min=None</em>, <em>data_max=None</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.xtomo_exporter.Export.xtomo_tiff" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">xtomo_tiff</tt><big>(</big><em>data</em>, <em>output_file=None</em>, <em>x_start=0</em>, <em>digits=5</em>, <em>axis=0</em>, <em>overwrite=False</em>, <em>delete=False</em>, <em>dtype='float32'</em>, <em>data_min=None</em>, <em>data_max=None</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_exporter.html#Export.xtomo_tiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_exporter.Export.xtomo_tiff" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write 3-D data to a stack of tif files.</p>
 <dl class="docutils">
 <dt>output_file <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>

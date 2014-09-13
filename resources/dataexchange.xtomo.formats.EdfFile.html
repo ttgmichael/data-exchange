@@ -125,21 +125,21 @@ through GetData method call.</p>
 </ul>
 <dl class="class">
 <dt id="dataexchange.xtomo.formats.EdfFile.EdfFile">
-<em class="property">class </em><tt class="descclassname">dataexchange.xtomo.formats.EdfFile.</tt><tt class="descname">EdfFile</tt><big>(</big><em>FileName</em>, <em>access=None</em>, <em>fastedf=None</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.EdfFile" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">dataexchange.xtomo.formats.EdfFile.</tt><tt class="descname">EdfFile</tt><big>(</big><em>FileName</em>, <em>access=None</em>, <em>fastedf=None</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/EdfFile.html#EdfFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.EdfFile" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="dataexchange.xtomo.formats.EdfFile.EdfFile.GetData">
-<tt class="descname">GetData</tt><big>(</big><em>*var</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.EdfFile.GetData" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">GetData</tt><big>(</big><em>*var</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/EdfFile.html#EdfFile.GetData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.EdfFile.GetData" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="dataexchange.xtomo.formats.EdfFile.EdfFile.GetDefaultNumpyType">
-<tt class="descname">GetDefaultNumpyType</tt><big>(</big><em>EdfType</em>, <em>index=None</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.EdfFile.GetDefaultNumpyType" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">GetDefaultNumpyType</tt><big>(</big><em>EdfType</em>, <em>index=None</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/EdfFile.html#EdfFile.GetDefaultNumpyType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.EdfFile.GetDefaultNumpyType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns NumPy type according Edf type</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="dataexchange.xtomo.formats.EdfFile.EdfFile.GetHeader">
-<tt class="descname">GetHeader</tt><big>(</big><em>Index</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.EdfFile.GetHeader" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">GetHeader</tt><big>(</big><em>Index</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/EdfFile.html#EdfFile.GetHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.EdfFile.GetHeader" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns dictionary with image header fields.
 Does not include the basic fields (static) defined by data shape, 
 type and file position. These are get with GetStaticHeader
@@ -149,13 +149,13 @@ Index:          The zero-based index of the image in the file</p>
 
 <dl class="method">
 <dt id="dataexchange.xtomo.formats.EdfFile.EdfFile.GetNumImages">
-<tt class="descname">GetNumImages</tt><big>(</big><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.EdfFile.GetNumImages" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">GetNumImages</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/EdfFile.html#EdfFile.GetNumImages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.EdfFile.GetNumImages" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns number of images of the object (and associated file)</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="dataexchange.xtomo.formats.EdfFile.EdfFile.GetPixel">
-<tt class="descname">GetPixel</tt><big>(</big><em>Index</em>, <em>Position</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.EdfFile.GetPixel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">GetPixel</tt><big>(</big><em>Index</em>, <em>Position</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/EdfFile.html#EdfFile.GetPixel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.EdfFile.GetPixel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns double value of the pixel, regardless the format of the array
 Index:      The zero-based index of the image in the file
 Position:   Tuple with the coordinete (x), (x,y) or (x,y,z)</p>
@@ -163,7 +163,7 @@ Position:   Tuple with the coordinete (x), (x,y) or (x,y,z)</p>
 
 <dl class="method">
 <dt id="dataexchange.xtomo.formats.EdfFile.EdfFile.GetStaticHeader">
-<tt class="descname">GetStaticHeader</tt><big>(</big><em>Index</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.EdfFile.GetStaticHeader" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">GetStaticHeader</tt><big>(</big><em>Index</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/EdfFile.html#EdfFile.GetStaticHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.EdfFile.GetStaticHeader" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns dictionary with static parameters
 Data format and file position dependent information
 (dim1,dim2,size,datatype,byteorder,headerId,Image)
@@ -172,20 +172,20 @@ Index:          The zero-based index of the image in the file</p>
 
 <dl class="method">
 <dt id="dataexchange.xtomo.formats.EdfFile.EdfFile.WriteImage">
-<tt class="descname">WriteImage</tt><big>(</big><em>*var</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.EdfFile.WriteImage" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">WriteImage</tt><big>(</big><em>*var</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/EdfFile.html#EdfFile.WriteImage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.EdfFile.WriteImage" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="function">
 <dt id="dataexchange.xtomo.formats.EdfFile.GetDefaultNumpyType">
-<tt class="descclassname">dataexchange.xtomo.formats.EdfFile.</tt><tt class="descname">GetDefaultNumpyType</tt><big>(</big><em>EdfType</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.GetDefaultNumpyType" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">dataexchange.xtomo.formats.EdfFile.</tt><tt class="descname">GetDefaultNumpyType</tt><big>(</big><em>EdfType</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/EdfFile.html#GetDefaultNumpyType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.GetDefaultNumpyType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns NumPy type according Edf type</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="dataexchange.xtomo.formats.EdfFile.GetRegion">
-<tt class="descclassname">dataexchange.xtomo.formats.EdfFile.</tt><tt class="descname">GetRegion</tt><big>(</big><em>Arr</em>, <em>Pos</em>, <em>Size</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.GetRegion" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">dataexchange.xtomo.formats.EdfFile.</tt><tt class="descname">GetRegion</tt><big>(</big><em>Arr</em>, <em>Pos</em>, <em>Size</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/EdfFile.html#GetRegion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.GetRegion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns array with refion of Arr.
 Arr must be 1d, 2d or 3d
 Pos and Size are tuples in the format (x) or (x,y) or (x,y,z)
@@ -194,12 +194,12 @@ Both parameters must have the same size as the dimention of Arr</p>
 
 <dl class="class">
 <dt id="dataexchange.xtomo.formats.EdfFile.Image">
-<em class="property">class </em><tt class="descclassname">dataexchange.xtomo.formats.EdfFile.</tt><tt class="descname">Image</tt><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.Image" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">dataexchange.xtomo.formats.EdfFile.</tt><tt class="descname">Image</tt><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/EdfFile.html#Image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.Image" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="dataexchange.xtomo.formats.EdfFile.SetDictCase">
-<tt class="descclassname">dataexchange.xtomo.formats.EdfFile.</tt><tt class="descname">SetDictCase</tt><big>(</big><em>Dict</em>, <em>Case</em>, <em>Flag</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.SetDictCase" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">dataexchange.xtomo.formats.EdfFile.</tt><tt class="descname">SetDictCase</tt><big>(</big><em>Dict</em>, <em>Case</em>, <em>Flag</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/EdfFile.html#SetDictCase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.EdfFile.SetDictCase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns dictionary with keys and/or values converted into upper or lowercase
 Dict:   input dictionary
 Case:   LOWER_CASE, UPPER_CASE

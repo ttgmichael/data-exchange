@@ -155,7 +155,7 @@ Microscopy Environment consortium respectively.</p>
 </div>
 <dl class="function">
 <dt id="dataexchange.xtomo.formats.tifffile.imsave">
-<tt class="descclassname">dataexchange.xtomo.formats.tifffile.</tt><tt class="descname">imsave</tt><big>(</big><em>filename</em>, <em>data</em>, <em>photometric=None</em>, <em>planarconfig=None</em>, <em>resolution=None</em>, <em>description=None</em>, <em>software='tifffile.py'</em>, <em>byteorder=None</em>, <em>bigtiff=False</em>, <em>compress=0</em>, <em>extratags=()</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.imsave" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">dataexchange.xtomo.formats.tifffile.</tt><tt class="descname">imsave</tt><big>(</big><em>filename</em>, <em>data</em>, <em>photometric=None</em>, <em>planarconfig=None</em>, <em>resolution=None</em>, <em>description=None</em>, <em>software='tifffile.py'</em>, <em>byteorder=None</em>, <em>bigtiff=False</em>, <em>compress=0</em>, <em>extratags=()</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#imsave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.imsave" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write image data to TIFF file.</p>
 <p>Image data are written in one stripe per plane.
 Dimensions larger than 2 or 3 (depending on photometric mode and
@@ -223,7 +223,7 @@ One of B, s, H, I, 2I, b, h, i, f, d, Q, or q.</dd>
 
 <dl class="function">
 <dt id="dataexchange.xtomo.formats.tifffile.imread">
-<tt class="descclassname">dataexchange.xtomo.formats.tifffile.</tt><tt class="descname">imread</tt><big>(</big><em>files</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.imread" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">dataexchange.xtomo.formats.tifffile.</tt><tt class="descname">imread</tt><big>(</big><em>files</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#imread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.imread" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return image data from TIFF file(s) as numpy array.</p>
 <p>The first image series is returned if no arguments are provided.</p>
 <dl class="docutils">
@@ -251,7 +251,7 @@ file names.</dd>
 
 <dl class="function">
 <dt id="dataexchange.xtomo.formats.tifffile.imshow">
-<tt class="descclassname">dataexchange.xtomo.formats.tifffile.</tt><tt class="descname">imshow</tt><big>(</big><em>data</em>, <em>title=None</em>, <em>vmin=0</em>, <em>vmax=None</em>, <em>cmap=None</em>, <em>bitspersample=None</em>, <em>photometric='rgb'</em>, <em>interpolation='nearest'</em>, <em>dpi=96</em>, <em>figure=None</em>, <em>subplot=111</em>, <em>maxdim=8192</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.imshow" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">dataexchange.xtomo.formats.tifffile.</tt><tt class="descname">imshow</tt><big>(</big><em>data</em>, <em>title=None</em>, <em>vmin=0</em>, <em>vmax=None</em>, <em>cmap=None</em>, <em>bitspersample=None</em>, <em>photometric='rgb'</em>, <em>interpolation='nearest'</em>, <em>dpi=96</em>, <em>figure=None</em>, <em>subplot=111</em>, <em>maxdim=8192</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#imshow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.imshow" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot n-dimensional images using matplotlib.pyplot.</p>
 <p>Return figure, subplot and plot axis.
 Requires pyplot already imported <tt class="docutils literal"><span class="pre">from</span> <span class="pre">matplotlib</span> <span class="pre">import</span> <span class="pre">pyplot</span></tt>.</p>
@@ -275,7 +275,7 @@ Requires pyplot already imported <tt class="docutils literal"><span class="pre">
 
 <dl class="class">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffFile">
-<em class="property">class </em><tt class="descclassname">dataexchange.xtomo.formats.tifffile.</tt><tt class="descname">TiffFile</tt><big>(</big><em>arg</em>, <em>name=None</em>, <em>multifile=False</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">dataexchange.xtomo.formats.tifffile.</tt><tt class="descname">TiffFile</tt><big>(</big><em>arg</em>, <em>name=None</em>, <em>multifile=False</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>Read image and meta-data from TIFF, STK, LSM, and FluoView files.</p>
 <p>TiffFile instances must be closed using the close method, which is
@@ -300,7 +300,7 @@ automatically called when using the &#8216;with&#8217; statement.</p>
 </div>
 <dl class="method">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffFile.asarray">
-<tt class="descname">asarray</tt><big>(</big><em>key=None</em>, <em>series=None</em>, <em>memmap=False</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.asarray" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">asarray</tt><big>(</big><em>key=None</em>, <em>series=None</em>, <em>memmap=False</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffFile.asarray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.asarray" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return image data of multiple TIFF pages as numpy array.</p>
 <p>By default the first image series is returned.</p>
 <dl class="docutils">
@@ -315,91 +315,91 @@ automatically called when using the &#8216;with&#8217; statement.</p>
 
 <dl class="method">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffFile.close">
-<tt class="descname">close</tt><big>(</big><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.close" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">close</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffFile.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.close" title="Permalink to this definition">¶</a></dt>
 <dd><p>Close open file handle(s).</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffFile.fstat">
-<tt class="descname">fstat</tt><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.fstat" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">fstat</tt><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffFile.fstat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.fstat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lazy object attribute whose value is computed on first access.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffFile.is_bigtiff">
-<tt class="descname">is_bigtiff</tt><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_bigtiff" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_bigtiff</tt><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffFile.is_bigtiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_bigtiff" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lazy object attribute whose value is computed on first access.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffFile.is_fluoview">
-<tt class="descname">is_fluoview</tt><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_fluoview" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_fluoview</tt><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffFile.is_fluoview"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_fluoview" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lazy object attribute whose value is computed on first access.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffFile.is_imagej">
-<tt class="descname">is_imagej</tt><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_imagej" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_imagej</tt><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffFile.is_imagej"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_imagej" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lazy object attribute whose value is computed on first access.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffFile.is_lsm">
-<tt class="descname">is_lsm</tt><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_lsm" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_lsm</tt><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffFile.is_lsm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_lsm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lazy object attribute whose value is computed on first access.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffFile.is_mdgel">
-<tt class="descname">is_mdgel</tt><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_mdgel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_mdgel</tt><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffFile.is_mdgel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_mdgel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lazy object attribute whose value is computed on first access.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffFile.is_mediacy">
-<tt class="descname">is_mediacy</tt><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_mediacy" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_mediacy</tt><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffFile.is_mediacy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_mediacy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lazy object attribute whose value is computed on first access.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffFile.is_micromanager">
-<tt class="descname">is_micromanager</tt><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_micromanager" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_micromanager</tt><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffFile.is_micromanager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_micromanager" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lazy object attribute whose value is computed on first access.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffFile.is_nih">
-<tt class="descname">is_nih</tt><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_nih" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_nih</tt><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffFile.is_nih"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_nih" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lazy object attribute whose value is computed on first access.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffFile.is_ome">
-<tt class="descname">is_ome</tt><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_ome" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_ome</tt><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffFile.is_ome"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_ome" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lazy object attribute whose value is computed on first access.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffFile.is_palette">
-<tt class="descname">is_palette</tt><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_palette" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_palette</tt><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffFile.is_palette"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_palette" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lazy object attribute whose value is computed on first access.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffFile.is_rgb">
-<tt class="descname">is_rgb</tt><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_rgb" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_rgb</tt><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffFile.is_rgb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_rgb" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lazy object attribute whose value is computed on first access.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffFile.is_stk">
-<tt class="descname">is_stk</tt><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_stk" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_stk</tt><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffFile.is_stk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.is_stk" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lazy object attribute whose value is computed on first access.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffFile.series">
-<tt class="descname">series</tt><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.series" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">series</tt><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffFile.series"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffFile.series" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lazy object attribute whose value is computed on first access.</p>
 </dd></dl>
 
@@ -407,7 +407,7 @@ automatically called when using the &#8216;with&#8217; statement.</p>
 
 <dl class="class">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffSequence">
-<em class="property">class </em><tt class="descclassname">dataexchange.xtomo.formats.tifffile.</tt><tt class="descname">TiffSequence</tt><big>(</big><em>files</em>, <em>imread=&lt;class 'dataexchange.xtomo.formats.tifffile.TiffFile'&gt;</em>, <em>pattern='axes'</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffSequence" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">dataexchange.xtomo.formats.tifffile.</tt><tt class="descname">TiffSequence</tt><big>(</big><em>files</em>, <em>imread=&lt;class 'dataexchange.xtomo.formats.tifffile.TiffFile'&gt;</em>, <em>pattern='axes'</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffSequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffSequence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>Sequence of image files.</p>
 <dl class="docutils">
@@ -426,14 +426,14 @@ automatically called when using the &#8216;with&#8217; statement.</p>
 </div>
 <dl class="method">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffSequence.asarray">
-<tt class="descname">asarray</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffSequence.asarray" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">asarray</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffSequence.asarray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffSequence.asarray" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read image data from all files and return as single numpy array.</p>
 <p>Raise IndexError if image shapes don&#8217;t match.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="dataexchange.xtomo.formats.tifffile.TiffSequence.close">
-<tt class="descname">close</tt><big>(</big><big>)</big><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffSequence.close" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">close</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/formats/tifffile.html#TiffSequence.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.formats.tifffile.TiffSequence.close" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
