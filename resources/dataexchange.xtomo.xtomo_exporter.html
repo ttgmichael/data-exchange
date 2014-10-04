@@ -1,0 +1,318 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>xtomo_exporter &mdash; Data Exchange 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="top" title="Data Exchange 0.2 documentation" href="../index.html" />
+    <link rel="up" title="Data Exchange Package" href="dataexchange.html" />
+    <link rel="next" title="Examples" href="demo.html" />
+    <link rel="prev" title="xtomo_reader" href="dataexchange.xtomo.xtomo_reader.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="demo.html" title="Examples"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="dataexchange.xtomo.xtomo_reader.html" title="xtomo_reader"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="dataexchange.html" accesskey="U">Data Exchange Package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-dataexchange.xtomo.xtomo_exporter">
+<span id="xtomo-exporter"></span><h1>xtomo_exporter<a class="headerlink" href="#module-dataexchange.xtomo.xtomo_exporter" title="Permalink to this headline">¶</a></h1>
+<p>Write tomographic image data in various format files.</p>
+<p>Supported image fomats include HDF5 Data Exchange and TIFF.</p>
+<span class="target" id="module-xtomo_exporter.py"></span><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Author:</th><td class="field-body"><a class="reference external" href="mailto:decarlof&#37;&#52;&#48;gmail&#46;com">Francesco De Carlo</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Organization:</th><td class="field-body">Argonne National Laboratory, Argonne, IL 60439 USA</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Version:</th><td class="field-body">2014.08.15</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="dataexchange.xtomo.xtomo_exporter.Export">
+<em class="property">class </em><tt class="descclassname">dataexchange.xtomo.xtomo_exporter.</tt><tt class="descname">Export</tt><big>(</big><em>data=None</em>, <em>data_white=None</em>, <em>data_dark=None</em>, <em>theta=None</em>, <em>hdf5_file_name=None</em>, <em>data_exchange_type=None</em>, <em>sample_name=None</em>, <em>logger=None</em>, <em>log='INFO'</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_exporter.html#Export"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_exporter.Export" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="dataexchange.xtomo.xtomo_exporter.Export.xtomo_exchange">
+<tt class="descname">xtomo_exchange</tt><big>(</big><em>data</em>, <em>data_white=None</em>, <em>data_dark=None</em>, <em>theta=None</em>, <em>sample_name=None</em>, <em>data_exchange_type=None</em>, <em>hdf5_file_name=None</em>, <em>log='INFO'</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_exporter.html#Export.xtomo_exchange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_exporter.Export.xtomo_exchange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write 3-D data to a data-exchange file.</p>
+<dl class="docutils">
+<dt>data <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
+<dd>3-D X-ray absorption tomography raw data.
+Size of the dimensions should be:
+[projections, slices, pixels].</dd>
+<dt>data_white, data_dark <span class="classifier-delimiter">:</span> <span class="classifier">ndarray, optional</span></dt>
+<dd>3-D white-field/dark_field data. Multiple
+projections are stacked together to obtain
+a 3-D matrix. 2nd and 3rd dimensions should
+be the same as data: [shots, slices, pixels].</dd>
+<dt>theta <span class="classifier-delimiter">:</span> <span class="classifier">ndarray, optional</span></dt>
+<dd>Data acquisition angles corresponding
+to each projection.</dd>
+<dt>data_excahnge_type <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>label defyining the type of data contained in data exchange file
+for raw data tomography data use &#8216;tomography_raw_projections&#8217;</dd>
+<dt>hd5_file_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Output file.</dd>
+</dl>
+<p>If file exists, does nothing</p>
+<ul>
+<li><p class="first">Convert tomographic projection series (raw, dark, white)  of tiff in data exchange:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dataexchange</span> <span class="kn">import</span> <span class="n">xtomo_importer</span> <span class="k">as</span> <span class="n">dx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dataexchange</span> <span class="kn">import</span> <span class="n">xtomo_exporter</span> <span class="k">as</span> <span class="n">ex</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/Anka/radios/image_.tif&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/Anka/darks/image_.tif&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/Anka/flats/image_.tif&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/tmp/Anka.h5&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">projections_start</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">projections_end</span> <span class="o">=</span> <span class="mi">3167</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">white_start</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">white_end</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dark_start</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dark_end</span> <span class="o">=</span> <span class="mi">100</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sample_name</span> <span class="o">=</span> <span class="s">&#39;Anka&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mydata</span> <span class="o">=</span> <span class="n">dx</span><span class="o">.</span><span class="n">Import</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Read series of images</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="p">,</span> <span class="n">white</span><span class="p">,</span> <span class="n">dark</span><span class="p">,</span> <span class="n">theta</span> <span class="o">=</span> <span class="n">mydata</span><span class="o">.</span><span class="n">xtomo_raw</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                                   <span class="n">projections_start</span> <span class="o">=</span> <span class="n">projections_start</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                                   <span class="n">projections_end</span> <span class="o">=</span> <span class="n">projections_end</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                                   <span class="n">white_file_name</span> <span class="o">=</span> <span class="n">white_file_name</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                                   <span class="n">white_start</span> <span class="o">=</span> <span class="n">white_start</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                                   <span class="n">white_end</span> <span class="o">=</span> <span class="n">white_end</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                                   <span class="n">dark_file_name</span> <span class="o">=</span> <span class="n">dark_file_name</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                                   <span class="n">dark_start</span> <span class="o">=</span> <span class="n">dark_start</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                                   <span class="n">dark_end</span> <span class="o">=</span> <span class="n">dark_end</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                                   <span class="n">projections_digits</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                                   <span class="n">log</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>                                                   <span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mydata</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">Export</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Create minimal data exchange hdf5 file</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mydata</span><span class="o">.</span><span class="n">xtomo_exchange</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                      <span class="n">data_white</span> <span class="o">=</span> <span class="n">white</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                      <span class="n">data_dark</span> <span class="o">=</span> <span class="n">dark</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                      <span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                      <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="n">hdf5_file_name</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                      <span class="n">data_exchange_type</span> <span class="o">=</span> <span class="s">&#39;tomography_raw_projections&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                      <span class="n">sample_name</span> <span class="o">=</span> <span class="n">sample_name</span>
+<span class="gp">&gt;&gt;&gt; </span>                      <span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.xtomo_exporter.Export.xtomo_tiff">
+<tt class="descname">xtomo_tiff</tt><big>(</big><em>data</em>, <em>output_file=None</em>, <em>x_start=0</em>, <em>digits=5</em>, <em>axis=0</em>, <em>overwrite=False</em>, <em>delete=False</em>, <em>dtype='float32'</em>, <em>data_min=None</em>, <em>data_max=None</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_exporter.html#Export.xtomo_tiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_exporter.Export.xtomo_tiff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write 3-D data to a stack of tif files.</p>
+<dl class="docutils">
+<dt>output_file <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
+<dd>Name of the output file.</dd>
+<dt>x_start <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>First index of the data on first dimension
+of the array.</dd>
+<dt>digits <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Number of digits used for file indexing.
+For example if 4: test_XXXX.tiff</dd>
+<dt>axis <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Imaages is read along that axis.</dd>
+<dt>overwrite: bool, optional</dt>
+<dd>if overwrite=True the existing files in the
+reconstruction folder will be overwritten
+with the new ones.</dd>
+<dt>delete: bool, optional</dt>
+<dd>if delete=True the reconstruction
+folder and its contents will be deleted.</dd>
+<dt>dtype <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional</span></dt>
+<dd>Export data type precision.</dd>
+<dt>data_min, data_max <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>User defined minimum and maximum values
+in the data that will be used to scale 
+the dataset when saving.</dd>
+</dl>
+<p>If file exists, saves it with a modified name.</p>
+<p>If output location is not specified, the data is
+saved inside <tt class="docutils literal"><span class="pre">recon</span></tt> folder where the input data
+resides. The name of the reconstructed files will
+be initialized with <tt class="docutils literal"><span class="pre">recon</span></tt></p>
+<ul>
+<li><p class="first">Save sinogram data:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">dataexchange.xtomo.xtomo_importer</span> <span class="kn">as</span> <span class="nn">dx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">dataexchange.xtomo.xtomo_exporter</span> <span class="kn">as</span> <span class="nn">ex</span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/microCT/Elettra.h5&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">file_name_out</span> <span class="o">=</span> <span class="s">&#39;tmp/sinogram_&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>    
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Load data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mydata</span> <span class="o">=</span> <span class="n">dx</span><span class="o">.</span><span class="n">Import</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Read series of images</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="p">,</span> <span class="n">white</span><span class="p">,</span> <span class="n">dark</span><span class="p">,</span> <span class="n">theta</span> <span class="o">=</span> <span class="n">mydata</span><span class="o">.</span><span class="n">xtomo_raw</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s">&#39;h5&#39;</span><span class="p">,</span> <span class="n">slices_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">slices_end</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Save data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mydata</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">Export</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mydata</span><span class="o">.</span><span class="n">xtomo_tiff</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">,</span> <span class="n">output_file</span> <span class="o">=</span> <span class="n">file_name_out</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>            
+</pre></div>
+</div>
+</li>
+<li><p class="first">Save first 16 projections:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">dataexchange.xtomo.xtomo_importer</span> <span class="kn">as</span> <span class="nn">dx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">dataexchange.xtomo.xtomo_exporter</span> <span class="kn">as</span> <span class="nn">ex</span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/microCT/Elettra.h5&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">file_name_out</span> <span class="o">=</span> <span class="s">&#39;tmp/projection_&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Load data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mydata</span> <span class="o">=</span> <span class="n">dx</span><span class="o">.</span><span class="n">Import</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Read series of images</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="p">,</span> <span class="n">white</span><span class="p">,</span> <span class="n">dark</span><span class="p">,</span> <span class="n">theta</span> <span class="o">=</span> <span class="n">mydata</span><span class="o">.</span><span class="n">xtomo_raw</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s">&#39;h5&#39;</span><span class="p">,</span> <span class="n">projections_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">projections_end</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># Save data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mydata</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">Export</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mydata</span><span class="o">.</span><span class="n">xtomo_tiff</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">,</span> <span class="n">output_file</span> <span class="o">=</span> <span class="n">file_name_out</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Save reconstructed slices:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">tomopy</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">dataexchange.xtomo.xtomo_importer</span> <span class="kn">as</span> <span class="nn">dx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">dataexchange.xtomo.xtomo_exporter</span> <span class="kn">as</span> <span class="nn">ex</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/tmp/Elettra.h5&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mydata</span> <span class="o">=</span> <span class="n">dx</span><span class="o">.</span><span class="n">Import</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="p">,</span> <span class="n">white</span><span class="p">,</span> <span class="n">dark</span><span class="p">,</span> <span class="n">theta</span> <span class="o">=</span> <span class="n">mydata</span><span class="o">.</span><span class="n">xtomo_raw</span><span class="p">(</span><span class="n">hdf5_file_name</span><span class="p">,</span> <span class="n">slices_start</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span> <span class="n">slices_end</span> <span class="o">=</span> <span class="mi">154</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s">&#39;h5&#39;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">tomopy</span><span class="o">.</span><span class="n">xtomo_dataset</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="s">&#39;debug&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">dataset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">white</span><span class="p">,</span> <span class="n">dark</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">correct_drift</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">optimize_center</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">gridrec</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Save data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mydata</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">Export</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mydata</span><span class="o">.</span><span class="n">xtomo_tiff</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">data_recon</span><span class="p">,</span> <span class="n">output_file</span> <span class="o">=</span> <span class="s">&#39;tmp/Elettra_dataExchange_2_tomoPy_&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dataexchange.xtomo.xtomo_reader.html"
+                        title="previous chapter">xtomo_reader</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="demo.html"
+                        title="next chapter">Examples</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/resources/dataexchange.xtomo.xtomo_exporter.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="demo.html" title="Examples"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="dataexchange.xtomo.xtomo_reader.html" title="xtomo_reader"
+             >previous</a> |</li>
+        <li><a href="../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="dataexchange.html" >Data Exchange Package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Argonne National Laboratory.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

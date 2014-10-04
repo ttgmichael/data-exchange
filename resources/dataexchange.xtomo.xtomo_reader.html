@@ -1,0 +1,469 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>xtomo_reader &mdash; Data Exchange 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="top" title="Data Exchange 0.2 documentation" href="../index.html" />
+    <link rel="up" title="Data Exchange Package" href="dataexchange.html" />
+    <link rel="next" title="xtomo_exporter" href="dataexchange.xtomo.xtomo_exporter.html" />
+    <link rel="prev" title="xtomo_importer" href="dataexchange.xtomo.xtomo_importer.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dataexchange.xtomo.xtomo_exporter.html" title="xtomo_exporter"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="dataexchange.xtomo.xtomo_importer.html" title="xtomo_importer"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="dataexchange.html" accesskey="U">Data Exchange Package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-dataexchange.xtomo.xtomo_reader">
+<span id="xtomo-reader"></span><h1>xtomo_reader<a class="headerlink" href="#module-dataexchange.xtomo.xtomo_reader" title="Permalink to this headline">¶</a></h1>
+<p>Read image data from various format files.</p>
+<p>This module provides low level file format support to <a class="reference external" href="dataexchange.xtomo.xtomo_importer.html">xtomo_importer</a></p>
+<p>Supported image fomats include TIFF, PackBits and LZW encoded TIFF, 
+HDF5 (Data Exchange and NeXuS), HDF4 (NeXuS), SPE, TXRM, XRM, EDF, 
+DPT, netCDF.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Author:</th><td class="field-body"><a class="reference external" href="mailto:decarlof&#37;&#52;&#48;gmail&#46;com">Francesco De Carlo</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Organization:</th><td class="field-body">Argonne National Laboratory, Argonne, IL 60439 USA</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Version:</th><td class="field-body">2014.08.15</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://www.h5py.org/">h5py</a></li>
+<li><a class="reference external" href="https://pypi.python.org/pypi/netCDF4">netCDF</a>  (optional for supporting APS 13-BM data)</li>
+<li><a class="reference external" href="https://pypi.python.org/pypi/pyhdf">pyhdf</a>  (optional for supporting APS 2-BM data)</li>
+<li><a class="reference external" href="http://www.pythonware.com/products/pil/">PIL.Image</a></li>
+<li><a class="reference external" href="http://www.lfd.uci.edu/~gohlke/">Tifffile.c 2013.01.18</a> (optional for supporting Elettra data) (recommended for faster decoding of PackBits and LZW encoded strings)</li>
+</ul>
+</div>
+<div class="section" id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h2>
+<p>PackBits and LZW encoded TIFF tested on little-endian platforms only.</p>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">_file_name</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf4&#39;</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">hdf4</span><span class="p">(</span><span class="n">x_start</span><span class="o">=</span><span class="n">slices_start</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                        <span class="n">x_end</span><span class="o">=</span><span class="n">slices_end</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                        <span class="n">x_step</span><span class="o">=</span><span class="n">slices_step</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                        <span class="n">array_name</span><span class="o">=</span><span class="s">&#39;data&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="dataexchange.xtomo.xtomo_reader.XTomoReader">
+<em class="property">class </em><tt class="descclassname">dataexchange.xtomo.xtomo_reader.</tt><tt class="descname">XTomoReader</tt><big>(</big><em>file_name</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_reader.html#XTomoReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_reader.XTomoReader" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="dataexchange.xtomo.xtomo_reader.XTomoReader.dpt">
+<tt class="descname">dpt</tt><big>(</big><em>x_start=0</em>, <em>x_end=0</em>, <em>x_step=1</em>, <em>y_start=0</em>, <em>y_end=0</em>, <em>y_step=1</em>, <em>z_start=0</em>, <em>z_end=0</em>, <em>z_step=1</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_reader.html#XTomoReader.dpt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_reader.XTomoReader.dpt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read 3-D tomographic projection data from a DPT (SRC) file.</p>
+<dl class="docutils">
+<dt>file_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Input dpt file.</dd>
+<dt>x_start, x_end, x_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+<dt>y_start, y_end, y_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+<dt>z_start, z_end, z_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+</dl>
+<dl class="docutils">
+<dt>out <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>Returns the data as a matrix.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.xtomo_reader.XTomoReader.edf">
+<tt class="descname">edf</tt><big>(</big><em>x_start=0</em>, <em>x_end=0</em>, <em>x_step=1</em>, <em>y_start=0</em>, <em>y_end=0</em>, <em>y_step=1</em>, <em>z_start=0</em>, <em>z_end=0</em>, <em>z_step=1</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_reader.html#XTomoReader.edf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_reader.XTomoReader.edf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read 3-D tomographic projection data from an EDF (ESRF) file.</p>
+<dl class="docutils">
+<dt>file_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Input edf file.</dd>
+<dt>x_start, x_end, x_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+<dt>y_start, y_end, y_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+<dt>z_start, z_end, z_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+</dl>
+<dl class="docutils">
+<dt>out <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>Returns the data as a matrix.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.xtomo_reader.XTomoReader.hdf4">
+<tt class="descname">hdf4</tt><big>(</big><em>array_name=None</em>, <em>x_start=0</em>, <em>x_end=0</em>, <em>x_step=1</em>, <em>y_start=0</em>, <em>y_end=0</em>, <em>y_step=1</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_reader.html#XTomoReader.hdf4"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_reader.XTomoReader.hdf4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read 2-D tomographic projection data from an HDF4 file.</p>
+<p>Opens <tt class="docutils literal"><span class="pre">file_name</span></tt> and reads the contents
+of the array specified by <tt class="docutils literal"><span class="pre">array_name</span></tt> in
+the specified group of the HDF file.</p>
+<dl class="docutils">
+<dt>file_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Input HDF file.</dd>
+<dt>array_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Name of the array to be read at exchange group.</dd>
+<dt>x_start, x_end, x_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole ndarray.</dd>
+<dt>y_start, y_end, y_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole ndarray.</dd>
+</dl>
+<dl class="docutils">
+<dt>out <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
+<dd>Returns the data as a matrix.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.xtomo_reader.XTomoReader.hdf5">
+<tt class="descname">hdf5</tt><big>(</big><em>array_name=None</em>, <em>x_start=0</em>, <em>x_end=0</em>, <em>x_step=1</em>, <em>y_start=0</em>, <em>y_end=0</em>, <em>y_step=1</em>, <em>z_start=0</em>, <em>z_end=0</em>, <em>z_step=1</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_reader.html#XTomoReader.hdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_reader.XTomoReader.hdf5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read 3-D tomographic projection data from a Data Exchange HDF5 file.</p>
+<dl class="docutils">
+<dt>Opens <tt class="docutils literal"><span class="pre">file_name</span></tt> and reads the contents of the 3D array specified </dt>
+<dd>by <tt class="docutils literal"><span class="pre">array_name</span></tt> in the specified group of the HDF5 file.</dd>
+</dl>
+<dl class="docutils">
+<dt>file_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Input HDF5 file.</dd>
+<dt>array_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Name of the array to be read at in the exchange group.</dd>
+<dt>x_start, x_end, x_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole ndarray.</dd>
+<dt>y_start, y_end, y_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole ndarray.</dd>
+<dt>z_start, z_end, z_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole ndarray.</dd>
+</dl>
+<dl class="docutils">
+<dt>out <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
+<dd>Returns the data as a matrix.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.xtomo_reader.XTomoReader.hdf5_2d">
+<tt class="descname">hdf5_2d</tt><big>(</big><em>array_name=None</em>, <em>x_start=0</em>, <em>x_end=None</em>, <em>x_step=1</em>, <em>y_start=0</em>, <em>y_end=None</em>, <em>y_step=1</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_reader.html#XTomoReader.hdf5_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_reader.XTomoReader.hdf5_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read 2-D tomographic projection data from an HDF5 file.</p>
+<p>Opens <tt class="docutils literal"><span class="pre">file_name</span></tt> and reads the contents
+of the array specified by <tt class="docutils literal"><span class="pre">array_name</span></tt> in
+the specified group of the HDF file.</p>
+<dl class="docutils">
+<dt>file_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Input HDF file.</dd>
+<dt>array_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Name of the array to be read at exchange group.</dd>
+<dt>x_start, x_end, x_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole ndarray.</dd>
+<dt>y_start, y_end, y_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole ndarray.</dd>
+</dl>
+<dl class="docutils">
+<dt>out <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
+<dd>Returns the data as a matrix.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.xtomo_reader.XTomoReader.netcdf">
+<tt class="descname">netcdf</tt><big>(</big><em>x_start=0</em>, <em>x_end=0</em>, <em>x_step=1</em>, <em>y_start=0</em>, <em>y_end=0</em>, <em>y_step=1</em>, <em>z_start=0</em>, <em>z_end=0</em>, <em>z_step=1</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_reader.html#XTomoReader.netcdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_reader.XTomoReader.netcdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read 3-D tomographic projection data from a netCDF file.</p>
+<dl class="docutils">
+<dt>file_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Input netcdf file.</dd>
+<dt>x_start, x_end, x_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+<dt>y_start, y_end, y_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+<dt>z_start, z_end, z_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+</dl>
+<dl class="docutils">
+<dt>out <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>Returns the data as a matrix.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.xtomo_reader.XTomoReader.nxs">
+<tt class="descname">nxs</tt><big>(</big><em>array_type=None</em>, <em>x_start=0</em>, <em>x_end=0</em>, <em>x_step=1</em>, <em>y_start=0</em>, <em>y_end=0</em>, <em>y_step=1</em>, <em>z_start=0</em>, <em>z_end=0</em>, <em>z_step=1</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_reader.html#XTomoReader.nxs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_reader.XTomoReader.nxs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read 3-D tomographic projection data from a NeXuS HDF5 file.</p>
+<dl class="docutils">
+<dt>Opens <tt class="docutils literal"><span class="pre">file_name</span></tt> and reads the contents of the 3D array specified </dt>
+<dd>by <tt class="docutils literal"><span class="pre">array_name</span></tt> in the specified group of the HDF5 file.</dd>
+</dl>
+<dl class="docutils">
+<dt>file_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Input HDF5 file.</dd>
+<dt>array_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Name of the array to be read at in the NeXuS file.
+Options are: projections, dark, white</dd>
+<dt>x_start, x_end, x_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole ndarray.</dd>
+<dt>y_start, y_end, y_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole ndarray.</dd>
+<dt>z_start, z_end, z_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole ndarray.</dd>
+</dl>
+<dl class="docutils">
+<dt>out <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
+<dd>Returns the data as a matrix.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.xtomo_reader.XTomoReader.spe">
+<tt class="descname">spe</tt><big>(</big><em>x_start=0</em>, <em>x_end=0</em>, <em>x_step=1</em>, <em>y_start=0</em>, <em>y_end=0</em>, <em>y_step=1</em>, <em>z_start=0</em>, <em>z_end=0</em>, <em>z_step=1</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_reader.html#XTomoReader.spe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_reader.XTomoReader.spe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read 3-D tomographic projection data from a SPE file.</p>
+<dl class="docutils">
+<dt>file_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Input spe file.</dd>
+<dt>x_start, x_end, x_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+<dt>y_start, y_end, y_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+<dt>z_start, z_end, z_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+</dl>
+<dl class="docutils">
+<dt>out <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>Returns the data as a matrix.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.xtomo_reader.XTomoReader.tiff">
+<tt class="descname">tiff</tt><big>(</big><em>x_start=0</em>, <em>x_end=0</em>, <em>x_step=1</em>, <em>y_start=0</em>, <em>y_end=0</em>, <em>y_step=1</em>, <em>dtype='uint16'</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_reader.html#XTomoReader.tiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_reader.XTomoReader.tiff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read 2-D tomographic projection data from a TIFF file.</p>
+<dl class="docutils">
+<dt>file_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Name of the input TIFF file.</dd>
+<dt>dtype <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
+<dd>Corresponding numpy data type of the TIFF file.</dd>
+<dt>x_start, x_end, x_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole ndarray.</dd>
+<dt>y_start, y_end, y_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole ndarray.</dd>
+</dl>
+<dl class="docutils">
+<dt>out <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
+<dd>Output 2-D matrix as numpy array.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.xtomo_reader.XTomoReader.tiffc">
+<tt class="descname">tiffc</tt><big>(</big><em>dtype='uint16'</em>, <em>x_start=0</em>, <em>x_end=0</em>, <em>x_step=1</em>, <em>y_start=0</em>, <em>y_end=0</em>, <em>y_step=1</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_reader.html#XTomoReader.tiffc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_reader.XTomoReader.tiffc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read 2-D complex(!) tomographic projection data from a TIFF file.</p>
+<dl class="docutils">
+<dt>file_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Name of the input TIFF file.</dd>
+<dt>dtype <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
+<dd>Corresponding Numpy data type of the TIFF file.</dd>
+<dt>x_start, x_end, x_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole ndarray.</dd>
+<dt>y_start, y_end, y_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole ndarray.</dd>
+</dl>
+<dl class="docutils">
+<dt>out <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
+<dd>Output 2-D matrix as numpy array.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.xtomo_reader.XTomoReader.txrm">
+<tt class="descname">txrm</tt><big>(</big><em>array_name=None</em>, <em>x_start=0</em>, <em>x_end=0</em>, <em>x_step=1</em>, <em>y_start=0</em>, <em>y_end=0</em>, <em>y_step=1</em>, <em>z_start=0</em>, <em>z_end=0</em>, <em>z_step=1</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_reader.html#XTomoReader.txrm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_reader.XTomoReader.txrm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read 3-D tomographic projection data from a TXRM file</p>
+<dl class="docutils">
+<dt>file_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Input txrm file.</dd>
+<dt>x_start, x_end, x_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+<dt>y_start, y_end, y_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+<dt>z_start, z_end, z_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+</dl>
+<dl class="docutils">
+<dt>out <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>Returns the data as a matrix.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dataexchange.xtomo.xtomo_reader.XTomoReader.xrm">
+<tt class="descname">xrm</tt><big>(</big><em>x_start=0</em>, <em>x_end=0</em>, <em>x_step=1</em>, <em>y_start=0</em>, <em>y_end=0</em>, <em>y_step=1</em>, <em>z_start=0</em>, <em>z_end=0</em>, <em>z_step=1</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_reader.html#XTomoReader.xrm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_reader.XTomoReader.xrm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read 3-D tomographic projection data from an XRM file.</p>
+<dl class="docutils">
+<dt>file_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Input xrm file.</dd>
+<dt>x_start, x_end, x_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+<dt>y_start, y_end, y_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+<dt>z_start, z_end, z_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+</dl>
+<dl class="docutils">
+<dt>out <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>Returns the data as a matrix.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">xtomo_reader</a><ul>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
+<li><a class="reference internal" href="#notes">Notes</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dataexchange.xtomo.xtomo_importer.html"
+                        title="previous chapter">xtomo_importer</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dataexchange.xtomo.xtomo_exporter.html"
+                        title="next chapter">xtomo_exporter</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/resources/dataexchange.xtomo.xtomo_reader.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dataexchange.xtomo.xtomo_exporter.html" title="xtomo_exporter"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="dataexchange.xtomo.xtomo_importer.html" title="xtomo_importer"
+             >previous</a> |</li>
+        <li><a href="../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="dataexchange.html" >Data Exchange Package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Argonne National Laboratory.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
