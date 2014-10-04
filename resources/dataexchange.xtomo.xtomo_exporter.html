@@ -79,6 +79,7 @@
 <dt id="dataexchange.xtomo.xtomo_exporter.Export.xtomo_exchange">
 <tt class="descname">xtomo_exchange</tt><big>(</big><em>data</em>, <em>data_white=None</em>, <em>data_dark=None</em>, <em>theta=None</em>, <em>sample_name=None</em>, <em>data_exchange_type=None</em>, <em>hdf5_file_name=None</em>, <em>log='INFO'</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_exporter.html#Export.xtomo_exchange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_exporter.Export.xtomo_exchange" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write 3-D data to a data-exchange file.</p>
+<p>Parameters</p>
 <dl class="docutils">
 <dt>data <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
 <dd>3-D X-ray absorption tomography raw data.
@@ -99,6 +100,7 @@ for raw data tomography data use &#8216;tomography_raw_projections&#8217;</dd>
 <dd>Output file.</dd>
 </dl>
 <p>If file exists, does nothing</p>
+<p>Examples</p>
 <ul>
 <li><p class="first">Convert tomographic projection series (raw, dark, white)  of tiff in data exchange:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dataexchange</span> <span class="kn">import</span> <span class="n">xtomo_importer</span> <span class="k">as</span> <span class="n">dx</span>
@@ -159,6 +161,7 @@ for raw data tomography data use &#8216;tomography_raw_projections&#8217;</dd>
 <dt id="dataexchange.xtomo.xtomo_exporter.Export.xtomo_tiff">
 <tt class="descname">xtomo_tiff</tt><big>(</big><em>data</em>, <em>output_file=None</em>, <em>x_start=0</em>, <em>digits=5</em>, <em>axis=0</em>, <em>overwrite=False</em>, <em>delete=False</em>, <em>dtype='float32'</em>, <em>data_min=None</em>, <em>data_max=None</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_exporter.html#Export.xtomo_tiff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_exporter.Export.xtomo_tiff" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write 3-D data to a stack of tif files.</p>
+<p>Parameters</p>
 <dl class="docutils">
 <dt>output_file <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
 <dd>Name of the output file.</dd>
@@ -184,11 +187,13 @@ folder and its contents will be deleted.</dd>
 in the data that will be used to scale 
 the dataset when saving.</dd>
 </dl>
+<p>Notes</p>
 <p>If file exists, saves it with a modified name.</p>
 <p>If output location is not specified, the data is
 saved inside <tt class="docutils literal"><span class="pre">recon</span></tt> folder where the input data
 resides. The name of the reconstructed files will
 be initialized with <tt class="docutils literal"><span class="pre">recon</span></tt></p>
+<p>Examples</p>
 <ul>
 <li><p class="first">Save sinogram data:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">dataexchange.xtomo.xtomo_importer</span> <span class="kn">as</span> <span class="nn">dx</span>
