@@ -1,0 +1,506 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataexchange.xtomo.xtomo_exporter &mdash; Data Exchange 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="top" title="Data Exchange 0.2 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for dataexchange.xtomo.xtomo_exporter</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Write tomographic image data in various format files.</span>
+
+<span class="sd">Supported image fomats include HDF5 Data Exchange and TIFF.</span>
+
+<span class="sd">.. module:: xtomo_exporter.py</span>
+<span class="sd">   :platform: Unix</span>
+<span class="sd">   :synopsis: Export tomographic data files.</span>
+
+<span class="sd">:Author:</span>
+<span class="sd">  `Francesco De Carlo &lt;mailto: decarlof@gmail.com&gt;`_</span>
+
+<span class="sd">:Organization:</span>
+<span class="sd">  Argonne National Laboratory, Argonne, IL 60439 USA</span>
+
+<span class="sd">:Version: 2014.08.15</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">skimage</span> <span class="kn">import</span> <span class="n">io</span> <span class="k">as</span> <span class="n">skimage_io</span> 
+
+<span class="kn">from</span> <span class="nn">data_exchange</span> <span class="kn">import</span> <span class="n">DataExchangeFile</span><span class="p">,</span> <span class="n">DataExchangeEntry</span>
+
+<div class="viewcode-block" id="Export"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_exporter.html#dataexchange.xtomo.xtomo_exporter.Export">[docs]</a><span class="k">class</span> <span class="nc">Export</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data_white</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                 <span class="n">data_dark</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">hdf5_file_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data_exchange_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">sample_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span><span class="p">):</span>
+
+        <span class="c"># Set the log level.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">log</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_logging</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Export.xtomo_exchange"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_exporter.html#dataexchange.xtomo.xtomo_exporter.Export.xtomo_exchange">[docs]</a>    <span class="k">def</span> <span class="nf">xtomo_exchange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_white</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data_dark</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sample_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                       <span class="n">data_exchange_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                       <span class="n">hdf5_file_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                       <span class="n">log</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span>
+                       <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Write 3-D data to a data-exchange file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">                    </span>
+<span class="sd">        data : ndarray</span>
+<span class="sd">            3-D X-ray absorption tomography raw data.</span>
+<span class="sd">            Size of the dimensions should be:</span>
+<span class="sd">            [projections, slices, pixels].</span>
+<span class="sd">            </span>
+<span class="sd">        data_white, data_dark : ndarray, optional</span>
+<span class="sd">            3-D white-field/dark_field data. Multiple</span>
+<span class="sd">            projections are stacked together to obtain</span>
+<span class="sd">            a 3-D matrix. 2nd and 3rd dimensions should</span>
+<span class="sd">            be the same as data: [shots, slices, pixels].</span>
+<span class="sd">            </span>
+<span class="sd">        theta : ndarray, optional</span>
+<span class="sd">            Data acquisition angles corresponding</span>
+<span class="sd">            to each projection.</span>
+
+<span class="sd">        data_excahnge_type : str</span>
+<span class="sd">            label defyining the type of data contained in data exchange file</span>
+<span class="sd">            for raw data tomography data use &#39;tomography_raw_projections&#39;</span>
+
+<span class="sd">        hd5_file_name : str</span>
+<span class="sd">            Output file.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        If file exists, does nothing</span>
+<span class="sd">                </span>
+<span class="sd">        Examples</span>
+<span class="sd">        </span>
+<span class="sd">        - Convert tomographic projection series (raw, dark, white)  of tiff in data exchange:</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; from dataexchange import xtomo_importer as dx</span>
+<span class="sd">            &gt;&gt;&gt; from dataexchange import xtomo_exporter as ex</span>
+
+<span class="sd">            &gt;&gt;&gt; file_name = &#39;/local/dataraid/databank/Anka/radios/image_.tif&#39;</span>
+<span class="sd">            &gt;&gt;&gt; dark_file_name = &#39;/local/dataraid/databank/Anka/darks/image_.tif&#39;</span>
+<span class="sd">            &gt;&gt;&gt; white_file_name = &#39;/local/dataraid/databank/Anka/flats/image_.tif&#39;</span>
+
+<span class="sd">            &gt;&gt;&gt; hdf5_file_name = &#39;/local/dataraid/databank/dataExchange/tmp/Anka.h5&#39;</span>
+
+<span class="sd">            &gt;&gt;&gt; projections_start = 0</span>
+<span class="sd">            &gt;&gt;&gt; projections_end = 3167</span>
+<span class="sd">            &gt;&gt;&gt; white_start = 0</span>
+<span class="sd">            &gt;&gt;&gt; white_end = 100</span>
+<span class="sd">            &gt;&gt;&gt; dark_start = 0</span>
+<span class="sd">            &gt;&gt;&gt; dark_end = 100</span>
+
+<span class="sd">            &gt;&gt;&gt; sample_name = &#39;Anka&#39;</span>
+<span class="sd">            &gt;&gt;&gt; </span>
+<span class="sd">            &gt;&gt;&gt; mydata = dx.Import()</span>
+<span class="sd">            &gt;&gt;&gt; # Read series of images</span>
+<span class="sd">            &gt;&gt;&gt; data, white, dark, theta = mydata.xtomo_raw(file_name,</span>
+<span class="sd">            &gt;&gt;&gt;                                                    projections_start = projections_start,</span>
+<span class="sd">            &gt;&gt;&gt;                                                    projections_end = projections_end,</span>
+<span class="sd">            &gt;&gt;&gt;                                                    white_file_name = white_file_name,</span>
+<span class="sd">            &gt;&gt;&gt;                                                    white_start = white_start,</span>
+<span class="sd">            &gt;&gt;&gt;                                                    white_end = white_end,</span>
+<span class="sd">            &gt;&gt;&gt;                                                    dark_file_name = dark_file_name,</span>
+<span class="sd">            &gt;&gt;&gt;                                                    dark_start = dark_start,</span>
+<span class="sd">            &gt;&gt;&gt;                                                    dark_end = dark_end,</span>
+<span class="sd">            &gt;&gt;&gt;                                                    projections_digits = 5,</span>
+<span class="sd">            &gt;&gt;&gt;                                                    log=&#39;INFO&#39;</span>
+<span class="sd">            &gt;&gt;&gt;                                                    )</span>
+
+<span class="sd">            &gt;&gt;&gt; mydata = ex.Export()</span>
+<span class="sd">            &gt;&gt;&gt; # Create minimal data exchange hdf5 file</span>
+<span class="sd">            &gt;&gt;&gt; mydata.xtomo_exchange(data = data,</span>
+<span class="sd">            &gt;&gt;&gt;                       data_white = white,</span>
+<span class="sd">            &gt;&gt;&gt;                       data_dark = dark,</span>
+<span class="sd">            &gt;&gt;&gt;                       theta = theta,</span>
+<span class="sd">            &gt;&gt;&gt;                       hdf5_file_name = hdf5_file_name,</span>
+<span class="sd">            &gt;&gt;&gt;                       data_exchange_type = &#39;tomography_raw_projections&#39;,</span>
+<span class="sd">            &gt;&gt;&gt;                       sample_name = sample_name</span>
+<span class="sd">            &gt;&gt;&gt;                       )</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+     
+        <span class="k">if</span> <span class="p">(</span><span class="n">hdf5_file_name</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">hdf5_file_name</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Data Exchange file: [</span><span class="si">%s</span><span class="s">] already exists&quot;</span><span class="p">,</span> <span class="n">hdf5_file_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># Create new folder.</span>
+                <span class="n">dirPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">hdf5_file_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dirPath</span><span class="p">):</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dirPath</span><span class="p">)</span>
+
+                <span class="c"># Get the file_name in lower case.</span>
+                <span class="n">lFn</span> <span class="o">=</span> <span class="n">hdf5_file_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+                <span class="c"># Split the string with the delimeter &#39;.&#39;</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">lFn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+
+                <span class="c"># Write the Data Exchange HDF5 file.</span>
+                <span class="c"># Open DataExchange file</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">DataExchangeFile</span><span class="p">(</span><span class="n">hdf5_file_name</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;w&#39;</span><span class="p">)</span> 
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Creating Data Exchange File [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">hdf5_file_name</span><span class="p">)</span>
+
+                <span class="c"># Create core HDF5 dataset in exchange group for projections_theta_range</span>
+                <span class="c"># deep stack of x,y images /exchange/data</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Adding projections to Data Exchange File [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">hdf5_file_name</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span> <span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span> <span class="s">&#39;units&#39;</span><span class="p">:</span><span class="s">&#39;counts&#39;</span><span class="p">,</span> <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="s">&#39;transmission&#39;</span><span class="p">,</span> <span class="s">&#39;axes&#39;</span><span class="p">:</span><span class="s">&#39;theta:y:x&#39;</span> <span class="p">}))</span>
+<span class="c">#                f.add_entry( DataExchangeEntry.data(data={&#39;value&#39;: data, &#39;units&#39;:&#39;counts&#39;, &#39;description&#39;: &#39;transmission&#39;, &#39;axes&#39;:&#39;theta:y:x&#39;, &#39;dataset_opts&#39;:  {&#39;compression&#39;: &#39;gzip&#39;, &#39;compression_opts&#39;: 4} }))</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">theta</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span> <span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">theta</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">theta</span><span class="p">,</span> <span class="s">&#39;units&#39;</span><span class="p">:</span><span class="s">&#39;degrees&#39;</span><span class="p">}))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Adding theta to Data Exchange File [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">hdf5_file_name</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;theta is not defined&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">data_dark</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Adding dark fields to  Data Exchange File [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">hdf5_file_name</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span> <span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">data_dark</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">data_dark</span><span class="p">,</span> <span class="s">&#39;units&#39;</span><span class="p">:</span><span class="s">&#39;counts&#39;</span><span class="p">,</span> <span class="s">&#39;axes&#39;</span><span class="p">:</span><span class="s">&#39;theta_dark:y:x&#39;</span> <span class="p">}))</span>
+<span class="c">#                    f.add_entry( DataExchangeEntry.data(data_dark={&#39;value&#39;: data_dark, &#39;units&#39;:&#39;counts&#39;, &#39;axes&#39;:&#39;theta_dark:y:x&#39;, &#39;dataset_opts&#39;:  {&#39;compression&#39;: &#39;gzip&#39;, &#39;compression_opts&#39;: 4} }))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;data dark is not defined&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">data_white</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Adding white fields to  Data Exchange File [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">hdf5_file_name</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span> <span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">data_white</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">data_white</span><span class="p">,</span> <span class="s">&#39;units&#39;</span><span class="p">:</span><span class="s">&#39;counts&#39;</span><span class="p">,</span> <span class="s">&#39;axes&#39;</span><span class="p">:</span><span class="s">&#39;theta_white:y:x&#39;</span> <span class="p">}))</span>
+<span class="c">#                    f.add_entry( DataExchangeEntry.data(data_white={&#39;value&#39;: data_white, &#39;units&#39;:&#39;counts&#39;, &#39;axes&#39;:&#39;theta_white:y:x&#39;, &#39;dataset_opts&#39;:  {&#39;compression&#39;: &#39;gzip&#39;, &#39;compression_opts&#39;: 4} }))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;data white is not defined&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">data_exchange_type</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Adding data type to  Data Exchange File [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">hdf5_file_name</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span> <span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">data_exchange_type</span><span class="p">}))</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">sample_name</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">sample_name</span> <span class="o">=</span> <span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span> <span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="n">sample_name</span><span class="p">},</span> <span class="n">description</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="s">&#39;Sample name was assigned by the HDF5 converter and based on the HDF5 file name&#39;</span><span class="p">}))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span> <span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="n">sample_name</span><span class="p">},</span> <span class="n">description</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="s">&#39;Sample name was read from the user log file&#39;</span><span class="p">}))</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;DONE!!!!. Created Data Exchange File [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">hdf5_file_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Nothing to do ...&quot;</span><span class="p">)</span>
+            
+</div>
+<div class="viewcode-block" id="Export.xtomo_tiff"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_exporter.html#dataexchange.xtomo.xtomo_exporter.Export.xtomo_tiff">[docs]</a>    <span class="k">def</span> <span class="nf">xtomo_tiff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">x_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                     <span class="n">digits</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                     <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;float32&#39;</span><span class="p">,</span> <span class="n">data_min</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data_max</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Write 3-D data to a stack of tif files.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        output_file : str, optional</span>
+<span class="sd">            Name of the output file.</span>
+
+<span class="sd">        x_start : scalar, optional</span>
+<span class="sd">            First index of the data on first dimension</span>
+<span class="sd">            of the array.</span>
+
+<span class="sd">        digits : scalar, optional</span>
+<span class="sd">            Number of digits used for file indexing.</span>
+<span class="sd">            For example if 4: test_XXXX.tiff</span>
+<span class="sd">            </span>
+<span class="sd">        axis : scalar, optional</span>
+<span class="sd">            Imaages is read along that axis.</span>
+<span class="sd">            </span>
+<span class="sd">        overwrite: bool, optional</span>
+<span class="sd">            if overwrite=True the existing files in the</span>
+<span class="sd">            reconstruction folder will be overwritten</span>
+<span class="sd">            with the new ones.</span>
+<span class="sd">            </span>
+<span class="sd">        delete: bool, optional</span>
+<span class="sd">            if delete=True the reconstruction</span>
+<span class="sd">            folder and its contents will be deleted.</span>
+<span class="sd">            </span>
+<span class="sd">        dtype : bool, optional</span>
+<span class="sd">            Export data type precision.</span>
+<span class="sd">            </span>
+<span class="sd">        data_min, data_max : scalar, optional</span>
+<span class="sd">            User defined minimum and maximum values</span>
+<span class="sd">            in the data that will be used to scale </span>
+<span class="sd">            the dataset when saving.</span>
+<span class="sd">        </span>
+<span class="sd">        Notes</span>
+<span class="sd">        </span>
+<span class="sd">        If file exists, saves it with a modified name.</span>
+<span class="sd">        </span>
+<span class="sd">        If output location is not specified, the data is</span>
+<span class="sd">        saved inside ``recon`` folder where the input data</span>
+<span class="sd">        resides. The name of the reconstructed files will</span>
+<span class="sd">        be initialized with ``recon``</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        </span>
+<span class="sd">        - Save sinogram data:</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; import dataexchange.xtomo.xtomo_importer as dx</span>
+<span class="sd">            &gt;&gt;&gt; import dataexchange.xtomo.xtomo_exporter as ex</span>
+<span class="sd">            &gt;&gt;&gt; </span>
+<span class="sd">            &gt;&gt;&gt; file_name = &#39;/local/dataraid/databank/dataExchange/microCT/Elettra.h5&#39;</span>
+<span class="sd">            &gt;&gt;&gt; file_name_out = &#39;tmp/sinogram_&#39;</span>
+<span class="sd">            &gt;&gt;&gt;     </span>
+<span class="sd">            &gt;&gt;&gt; # Load data</span>
+<span class="sd">            &gt;&gt;&gt; mydata = dx.Import()</span>
+<span class="sd">            &gt;&gt;&gt; # Read series of images</span>
+<span class="sd">            &gt;&gt;&gt; data, white, dark, theta = mydata.xtomo_raw(file_name, data_type=&#39;h5&#39;, slices_start=0, slices_end=16)</span>
+<span class="sd">            &gt;&gt;&gt; </span>
+<span class="sd">            &gt;&gt;&gt; # Save data</span>
+<span class="sd">            &gt;&gt;&gt; mydata = ex.Export()</span>
+<span class="sd">            &gt;&gt;&gt; mydata.xtomo_tiff(data = data, output_file = file_name_out, axis=1)</span>
+<span class="sd">            &gt;&gt;&gt;             </span>
+<span class="sd">        - Save first 16 projections:</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; import dataexchange.xtomo.xtomo_importer as dx</span>
+<span class="sd">            &gt;&gt;&gt; import dataexchange.xtomo.xtomo_exporter as ex</span>
+<span class="sd">            &gt;&gt;&gt; </span>
+<span class="sd">            &gt;&gt;&gt; file_name = &#39;/local/dataraid/databank/dataExchange/microCT/Elettra.h5&#39;</span>
+<span class="sd">            &gt;&gt;&gt; file_name_out = &#39;tmp/projection_&#39;</span>
+<span class="sd">            &gt;&gt;&gt; </span>
+<span class="sd">            &gt;&gt;&gt; # Load data</span>
+<span class="sd">            &gt;&gt;&gt; mydata = dx.Import()</span>
+<span class="sd">            &gt;&gt;&gt; # Read series of images</span>
+<span class="sd">            &gt;&gt;&gt; data, white, dark, theta = mydata.xtomo_raw(file_name, data_type=&#39;h5&#39;, projections_start=0, projections_end=16)</span>
+
+<span class="sd">            &gt;&gt;&gt; # Save data</span>
+<span class="sd">            &gt;&gt;&gt; mydata = ex.Export()</span>
+<span class="sd">            &gt;&gt;&gt; mydata.xtomo_tiff(data = data, output_file = file_name_out, axis=0)</span>
+<span class="sd">            </span>
+<span class="sd">        - Save reconstructed slices:</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; import tomopy </span>
+<span class="sd">            &gt;&gt;&gt; import dataexchange.xtomo.xtomo_importer as dx</span>
+<span class="sd">            &gt;&gt;&gt; import dataexchange.xtomo.xtomo_exporter as ex</span>
+
+<span class="sd">            &gt;&gt;&gt; hdf5_file_name = &#39;/local/dataraid/databank/dataExchange/tmp/Elettra.h5&#39;</span>
+<span class="sd">            &gt;&gt;&gt; mydata = dx.Import()</span>
+<span class="sd">            &gt;&gt;&gt; data, white, dark, theta = mydata.xtomo_raw(hdf5_file_name, slices_start = 150, slices_end = 154, data_type=&#39;h5&#39;, log=&#39;INFO&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; d = tomopy.xtomo_dataset(log=&#39;debug&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; d.dataset(data, white, dark, theta)</span>
+<span class="sd">            &gt;&gt;&gt; d.normalize()</span>
+<span class="sd">            &gt;&gt;&gt; d.correct_drift()</span>
+<span class="sd">            &gt;&gt;&gt; d.optimize_center()</span>
+<span class="sd">            &gt;&gt;&gt; d.gridrec()</span>
+<span class="sd">            &gt;&gt;&gt; </span>
+<span class="sd">            &gt;&gt;&gt; # Save data</span>
+<span class="sd">            &gt;&gt;&gt; mydata = ex.Export()</span>
+<span class="sd">            &gt;&gt;&gt; mydata.xtomo_tiff(data = d.data_recon, output_file = &#39;tmp/Elettra_dataExchange_2_tomoPy_&#39;, axis=0)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output_file</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span>
+        <span class="n">dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span>
+            
+        <span class="c"># Find max min of data for scaling</span>
+        <span class="k">if</span> <span class="n">data_max</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">data_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data_min</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">data_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="n">data_max</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">&gt;</span><span class="n">data_max</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_max</span>
+        <span class="k">if</span> <span class="n">data_min</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">&lt;</span><span class="n">data_min</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_min</span>
+        
+        <span class="c"># Remove TIFF extension if there is.</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">output_file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;tif&#39;</span><span class="p">)</span> <span class="ow">or</span>
+            <span class="n">output_file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;tiff&#39;</span><span class="p">))</span> <span class="p">:</span>
+                <span class="n">output_file</span> <span class="o">=</span> <span class="n">output_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+      
+        <span class="k">if</span> <span class="n">delete</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dir_path</span><span class="p">):</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">dir_path</span><span class="p">)</span>
+                
+        <span class="c"># Create new folders.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dir_path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dir_path</span><span class="p">)</span>
+
+        <span class="c"># Select desired x from whole data.</span>
+        <span class="n">num_x</span><span class="p">,</span> <span class="n">num_y</span><span class="p">,</span> <span class="n">num_z</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">x_end</span> <span class="o">=</span> <span class="n">x_start</span><span class="o">+</span><span class="n">num_x</span>
+        <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">x_end</span> <span class="o">=</span> <span class="n">x_start</span><span class="o">+</span><span class="n">num_y</span>
+        <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">x_end</span> <span class="o">=</span> <span class="n">x_start</span><span class="o">+</span><span class="n">num_z</span>
+
+        <span class="c"># Write data.</span>
+        <span class="n">file_index</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">digits</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">digits</span><span class="p">):</span>
+            <span class="n">file_index</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;0&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">digits</span> <span class="o">-</span> <span class="n">m</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">x_start</span><span class="p">,</span> <span class="n">x_end</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">digits</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">ind</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">file_body</span> <span class="o">=</span> <span class="n">output_file</span> <span class="o">+</span> <span class="n">file_index</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ind</span><span class="p">[</span><span class="n">m</span><span class="p">])</span>
+                    <span class="n">file_name</span> <span class="o">=</span> <span class="n">file_body</span> <span class="o">+</span> <span class="s">&#39;.tif&#39;</span>
+                    <span class="k">break</span>
+
+            <span class="c"># check if file exists.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+                <span class="n">new_file_name</span> <span class="o">=</span> <span class="n">file_name</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;File [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+                    <span class="c"># generate new file unique name.</span>
+                    <span class="n">indq</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">FLAG_SAVE</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">while</span> <span class="ow">not</span> <span class="n">FLAG_SAVE</span><span class="p">:</span>
+                        <span class="n">new_file_body</span> <span class="o">=</span> <span class="n">file_body</span> <span class="o">+</span> <span class="s">&#39;-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">indq</span><span class="p">)</span>
+                        <span class="n">new_file_name</span> <span class="o">=</span> <span class="n">new_file_body</span> <span class="o">+</span> <span class="s">&#39;.tif&#39;</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">new_file_name</span><span class="p">):</span>
+                            <span class="c">#self.logger.warning(&quot;File [%s] exists&quot;, new_file_name)</span>
+                            <span class="n">FLAG_SAVE</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="n">file_name</span> <span class="o">=</span> <span class="n">new_file_name</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;File [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">new_file_name</span><span class="p">)</span>
+                            <span class="n">indq</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">arr</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">m</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+            <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">arr</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">m</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">arr</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">m</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="s">&#39;uint8&#39;</span><span class="p">:</span>
+                <span class="n">arr</span> <span class="o">=</span> <span class="p">((</span><span class="n">arr</span><span class="o">*</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">data_min</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">data_max</span><span class="o">-</span><span class="n">data_min</span><span class="p">)</span><span class="o">*</span><span class="mi">255</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;uint8&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="s">&#39;uint16&#39;</span><span class="p">:</span>
+                <span class="n">arr</span> <span class="o">=</span> <span class="p">((</span><span class="n">arr</span><span class="o">*</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">data_min</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">data_max</span><span class="o">-</span><span class="n">data_min</span><span class="p">)</span><span class="o">*</span><span class="mi">65535</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;uint16&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="s">&#39;float32&#39;</span><span class="p">:</span>
+                <span class="n">arr</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;float32&#39;</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s">&quot;ignore&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;File saved as [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">new_file_name</span><span class="p">)</span>
+                <span class="n">skimage_io</span><span class="o">.</span><span class="n">imsave</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">plugin</span><span class="o">=</span><span class="s">&#39;tifffile&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;File conversion is complete&quot;</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_init_logging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setup and start command line logging.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Top-level log setup.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;data exchange&quot;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;DEBUG&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;INFO&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span> 
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;WARN&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARN</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;WARNING&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;ERROR&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+        
+        <span class="c"># Terminal stream log.</span>
+        <span class="n">ch</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;DEBUG&#39;</span><span class="p">:</span>
+            <span class="n">ch</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;INFO&#39;</span><span class="p">:</span>
+            <span class="n">ch</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span> 
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;WARN&#39;</span><span class="p">:</span>
+            <span class="n">ch</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARN</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;WARNING&#39;</span><span class="p">:</span>
+            <span class="n">ch</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;ERROR&#39;</span><span class="p">:</span>
+            <span class="n">ch</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+        
+        <span class="c"># Show date and time.</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%(asctime)s</span><span class="s"> - </span><span class="si">%(name)s</span><span class="s"> - </span><span class="si">%(levelname)s</span><span class="s"> - </span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">ch</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+            
+        <span class="c"># Update logger.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">):</span> <span class="c"># For fist time create handlers.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Argonne National Laboratory.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

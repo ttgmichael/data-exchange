@@ -1,0 +1,994 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataexchange.xtomo.xtomo_importer &mdash; Data Exchange 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="top" title="Data Exchange 0.2 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for dataexchange.xtomo.xtomo_importer</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Read tomographic image data from various format files.</span>
+
+<span class="sd">Supported image fomats include TIFF, PackBits and LZW encoded TIFF, </span>
+<span class="sd">HDF5 (Data Exchange and NeXuS), HDF4 (NeXuS), SPE, TXRM, XRM, EDF, </span>
+<span class="sd">DPT, netCDF. </span>
+
+<span class="sd">.. module:: xtomo_importer.py</span>
+<span class="sd">   :platform: Unix</span>
+<span class="sd">   :synopsis: Import tomographic data files returning data, data_white, data_dark, theta.</span>
+
+<span class="sd">:Author:</span>
+<span class="sd">  `Francesco De Carlo &lt;mailto: decarlof@gmail.com&gt;`_</span>
+
+<span class="sd">:Organization:</span>
+<span class="sd">  Argonne National Laboratory, Argonne, IL 60439 USA</span>
+
+<span class="sd">:Version: 2014.08.15</span>
+
+<span class="sd">Examples</span>
+
+<span class="sd">&gt;&gt;&gt; import dataexchange.xtomo.xtomo_importer as dx</span>
+<span class="sd">&gt;&gt;&gt; import dataexchange.xtomo.xtomo_exporter as ex</span>
+<span class="sd">&gt;&gt;&gt; </span>
+<span class="sd">&gt;&gt;&gt; </span>
+<span class="sd">&gt;&gt;&gt; file_name = &#39;/local/data/radios/image_.tif&#39;</span>
+<span class="sd">&gt;&gt;&gt; dark_file_name = &#39;/local/data/darks/image_.tif&#39;</span>
+<span class="sd">&gt;&gt;&gt; white_file_name = &#39;/local/data/flats/image_.tif&#39;</span>
+<span class="sd">&gt;&gt;&gt; </span>
+<span class="sd">&gt;&gt;&gt; hdf5_file_name = &#39;/local/data/dataExchange/Anka.h5&#39;</span>
+<span class="sd">&gt;&gt;&gt; </span>
+<span class="sd">&gt;&gt;&gt; projections_start = 0</span>
+<span class="sd">&gt;&gt;&gt; projections_end = 3167</span>
+<span class="sd">&gt;&gt;&gt; white_start = 0</span>
+<span class="sd">&gt;&gt;&gt; white_end = 100</span>
+<span class="sd">&gt;&gt;&gt; dark_start = 0</span>
+<span class="sd">&gt;&gt;&gt; dark_end = 100</span>
+<span class="sd">&gt;&gt;&gt; </span>
+<span class="sd">&gt;&gt;&gt; sample_name = &#39;Anka&#39;</span>
+<span class="sd">&gt;&gt;&gt;     </span>
+<span class="sd">&gt;&gt;&gt; mydata = dx.Import()</span>
+<span class="sd">&gt;&gt;&gt; # Read series of images</span>
+<span class="sd">&gt;&gt;&gt; data, white, dark, theta = mydata.xtomo_raw(file_name,</span>
+<span class="sd">&gt;&gt;&gt;                                                    projections_start = projections_start,</span>
+<span class="sd">&gt;&gt;&gt;                                                    projections_end = projections_end,</span>
+<span class="sd">&gt;&gt;&gt;                                                    white_file_name = white_file_name,</span>
+<span class="sd">&gt;&gt;&gt;                                                    white_start = white_start,</span>
+<span class="sd">&gt;&gt;&gt;                                                    white_end = white_end,</span>
+<span class="sd">&gt;&gt;&gt;                                                    dark_file_name = dark_file_name,</span>
+<span class="sd">&gt;&gt;&gt;                                                    dark_start = dark_start,</span>
+<span class="sd">&gt;&gt;&gt;                                                    dark_end = dark_end,</span>
+<span class="sd">&gt;&gt;&gt;                                                    projections_digits = 5,</span>
+<span class="sd">&gt;&gt;&gt;                                                    log=&#39;INFO&#39;</span>
+<span class="sd">&gt;&gt;&gt;                                                    )</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">dataexchange.xtomo.xtomo_reader</span> <span class="kn">import</span> <span class="n">XTomoReader</span>
+
+<div class="viewcode-block" id="Import"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_importer.html#dataexchange.xtomo.xtomo_importer.Import">[docs]</a><span class="k">class</span> <span class="nc">Import</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data_white</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">data_dark</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">color_log</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">stream_handler</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_white</span> <span class="o">=</span> <span class="n">data_white</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_dark</span> <span class="o">=</span> <span class="n">data_dark</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span>
+
+        <span class="c"># Logging init.</span>
+        <span class="k">if</span> <span class="n">color_log</span><span class="p">:</span> <span class="c"># enable colored logging</span>
+            <span class="kn">from</span> <span class="nn">tomopy.tools</span> <span class="kn">import</span> <span class="n">colorer</span>
+
+        <span class="c"># Set the log level.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">log</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_logging</span><span class="p">(</span><span class="n">stream_handler</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Import.xtomo_raw"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_importer.html#dataexchange.xtomo.xtomo_importer.Import.xtomo_raw">[docs]</a>    <span class="k">def</span> <span class="nf">xtomo_raw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span>
+                         <span class="n">projections_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                         <span class="n">projections_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                         <span class="n">projections_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                         <span class="n">slices_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                         <span class="n">slices_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                         <span class="n">slices_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                         <span class="n">pixels_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                         <span class="n">pixels_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                         <span class="n">pixels_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                         <span class="n">white_file_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                         <span class="n">white_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                         <span class="n">white_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                         <span class="n">white_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                         <span class="n">dark_file_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                         <span class="n">dark_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                         <span class="n">dark_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                         <span class="n">dark_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                         <span class="n">projections_angle_start</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                         <span class="n">projections_angle_end</span> <span class="o">=</span> <span class="mi">180</span><span class="p">,</span>
+                         <span class="n">projections_zeros</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                         <span class="n">projections_digits</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                         <span class="n">white_digits</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                         <span class="n">dark_digits</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                         <span class="n">white_zeros</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                         <span class="n">dark_zeros</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                         <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint16&#39;</span><span class="p">,</span>
+                         <span class="n">data_type</span><span class="o">=</span><span class="s">&#39;tiff&#39;</span><span class="p">,</span>
+                         <span class="n">exchange_rank</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                         <span class="n">log</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read a stack of 2-D HDF4, TIFF, spe or netCDF images.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        file_name : str</span>
+<span class="sd">            Base name of the input HDF4 or TIFF files.</span>
+<span class="sd">            For example if the projections names are /local/data/test_XXXX.hdf</span>
+<span class="sd">            file_name is /local/data/test_.hdf</span>
+
+<span class="sd">        projections_start, projections_end, projections_step : scalar, optional</span>
+<span class="sd">            start and end index for the projection</span>
+<span class="sd">            images to load. Use step to define a stride.</span>
+
+<span class="sd">        slices_start, slices_end, slices_step : scalar, optional</span>
+<span class="sd">            start and end pixel of the projection image to load</span>
+<span class="sd">            along the rotation axis. Use step to define a stride.</span>
+
+<span class="sd">        white_file_name, dark_file_name : str, optional</span>
+<span class="sd">            Base name of the white and dark field input files.</span>
+<span class="sd">            For example if the white field names</span>
+<span class="sd">            are /local/data/test_bg_XXXX.hdf</span>
+<span class="sd">            file_name is /local/data/test_bg_.hdf.</span>
+<span class="sd">            If omitted white_file_name = file_name.</span>
+
+<span class="sd">        white_start, white_end, white_step : scalar, optional</span>
+<span class="sd">            start and end index for the white field</span>
+<span class="sd">            files to load. Use step define a stride.</span>
+
+<span class="sd">        dark_start, dark_end, dark_step : scalar, optional</span>
+<span class="sd">            start and end index for the dark field</span>
+<span class="sd">            files to load. Use step to define a stride.</span>
+
+<span class="sd">        projections_digits, white_digits, dark_digits : scalar, optional</span>
+<span class="sd">            Maximum number of digits used for file indexing.</span>
+<span class="sd">            For example if last file is: test_9999.hdf _digits is 4</span>
+<span class="sd">            if -1 skips series of file name generation and assume one sigle file is used for</span>
+<span class="sd">            all projections, white or dark.</span>
+
+<span class="sd">        projections_zeros, white_zeros, dark_zeros : bool, optional</span>
+<span class="sd">            If ``True`` assumes all indexing uses projections_digits digits:</span>
+<span class="sd">            if projections_digits = 4 and projections_zeros = true indeding is:</span>
+<span class="sd">            (0001, 0002, ..., 9999).</span>
+<span class="sd">            If ``False`` omits projections_zeros in</span>
+<span class="sd">            indexing (1, 2, ..., 9999)</span>
+
+<span class="sd">        sample_name : str, optional</span>
+<span class="sd">            sample name. If not defined the file name is assigmed as sample name</span>
+
+<span class="sd">        hdf5_file_name : str, optional</span>
+<span class="sd">            if set the series for images is saved as a data exchange file</span>
+
+<span class="sd">        dtype : str, optional</span>
+<span class="sd">            Corresponding Numpy data type of file.</span>
+
+<span class="sd">        data_type : str, optional</span>
+<span class="sd">            supported options are:</span>
+<span class="sd">                - ``compressed_tiff``: tiff files used at elettra</span>
+<span class="sd">                - ``dpt``: ASCII data from SRC infrared tomography</span>
+<span class="sd">                - ``edf``: ESRF file format</span>
+<span class="sd">                - ``nc``: netCDF data from 13-BM</span>
+<span class="sd">                - ``nxs``: NeXuS Diamond Light Source</span>
+<span class="sd">                - ``hdf4``: HDF4 files used on old detectors at APS 2-BM</span>
+<span class="sd">                - ``h5``: Data Exchange HDF5</span>
+<span class="sd">                - ``spe``: spe data from APS 13-BM</span>
+<span class="sd">                - ``tiff``: uncompressed regualar tiff files used at Petra III, ALS, Elettra, SLS, Australia, CHESS</span>
+<span class="sd">                - ``xradia``: txrm and xrm used by all Xradia systems</span>
+
+
+<span class="sd">        exchange_rank : int, optional</span>
+<span class="sd">            set when reading Data Exchange HDF5 files</span>
+<span class="sd">            exchange rank is added to &quot;exchange&quot; to point tomopy to the data to recontruct.</span>
+<span class="sd">            if rank is not set then the data are raw from the detector and are located under</span>
+<span class="sd">            exchange = &quot;exchange/...&quot;, to process data that are the result of some intemedite </span>
+<span class="sd">            processing step then exchange_rank = 1 will direct tomopy to process &quot;exchange1/...&quot;</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        </span>
+<span class="sd">        Output : data, data_white, data_dark, theta</span>
+
+<span class="sd">       &quot;&quot;&quot;</span>
+        <span class="n">projection_exist</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">dark_exist</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">white_exist</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">projections_digits</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="c"># Set default dark/white file names</span>
+            <span class="k">if</span> <span class="n">white_file_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&quot;does_not_exist&quot;</span>
+            <span class="k">if</span> <span class="n">dark_file_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&quot;does_not_exist&quot;</span>
+            
+        <span class="k">else</span><span class="p">:</span>    
+            <span class="c"># Set default prefix for white and dark series of files.</span>
+            <span class="k">if</span> <span class="n">white_file_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">white_file_name</span> <span class="o">=</span> <span class="n">file_name</span>
+            <span class="k">if</span> <span class="n">dark_file_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">dark_file_name</span> <span class="o">=</span> <span class="n">file_name</span>
+
+        <span class="c"># Set default digits.</span>
+        <span class="k">if</span> <span class="n">white_digits</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">white_digits</span> <span class="o">=</span> <span class="n">projections_digits</span>
+        <span class="k">if</span> <span class="n">dark_digits</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">dark_digits</span> <span class="o">=</span> <span class="n">projections_digits</span>
+
+
+        <span class="c"># Determine file name and extension type.</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf4&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;h4&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;hdf&#39;</span><span class="p">):</span>
+                <span class="n">data_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">dataExtension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;h4&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;hdf&#39;</span><span class="p">):</span>
+                <span class="n">data_file_white</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">white_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;h4&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;hdf&#39;</span><span class="p">):</span>
+                <span class="n">data_file_dark</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf5&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;HDF&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;hdf&#39;</span><span class="p">):</span>
+                <span class="n">data_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">dataExtension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;HDF&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;hdf&#39;</span><span class="p">):</span>
+                <span class="n">data_file_white</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">white_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;HDF&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;hdf&#39;</span><span class="p">):</span>
+                <span class="n">data_file_dark</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;nxs&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;NXS&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;nxs&#39;</span><span class="p">):</span>
+                <span class="n">data_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">dataExtension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;NXS&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;nxs&#39;</span><span class="p">):</span>
+                <span class="n">data_file_white</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">white_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;NXS&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;nxs&#39;</span><span class="p">):</span>
+                <span class="n">data_file_dark</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;spe&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;SPE&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;spe&#39;</span><span class="p">):</span>
+                <span class="n">data_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">dataExtension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;SPE&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;spe&#39;</span><span class="p">):</span>
+                <span class="n">data_file_white</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">white_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;SPE&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;spe&#39;</span><span class="p">):</span>
+                <span class="n">data_file_dark</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;nc&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;NC&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;nc&#39;</span><span class="p">):</span>
+                <span class="n">data_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">dataExtension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;NC&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;nc&#39;</span><span class="p">):</span>
+                <span class="n">data_file_white</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">white_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;NC&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;nc&#39;</span><span class="p">):</span>
+                <span class="n">data_file_dark</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="p">((</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;tiff&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;compressed_tiff&#39;</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;tif&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;tiff&#39;</span><span class="p">):</span>
+                <span class="n">data_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">dataExtension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;tif&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;tiff&#39;</span><span class="p">):</span>
+                <span class="n">data_file_white</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">white_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;tif&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;tiff&#39;</span><span class="p">):</span>
+                <span class="n">data_file_dark</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;edf&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;EDF&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;edf&#39;</span><span class="p">):</span>
+                <span class="n">data_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">dataExtension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;EDF&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;edf&#39;</span><span class="p">):</span>
+                <span class="n">data_file_white</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">white_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;EDF&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;edf&#39;</span><span class="p">):</span>
+                <span class="n">data_file_dark</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;dpt&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;DPT&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;dpt&#39;</span><span class="p">):</span>
+                <span class="n">data_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">dataExtension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;DPT&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;dpt&#39;</span><span class="p">):</span>
+                <span class="n">data_file_white</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">white_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;DPT&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;dpt&#39;</span><span class="p">):</span>
+                <span class="n">data_file_dark</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;h5&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">exchange_rank</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">exchange_base</span> <span class="o">=</span> <span class="s">&#39;exchange{:d}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">exchange_rank</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">exchange_base</span> <span class="o">=</span> <span class="s">&quot;exchange&quot;</span>     
+
+            <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;H5&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;h5&#39;</span><span class="p">):</span>
+                <span class="n">data_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">dataExtension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;H5&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;h5&#39;</span><span class="p">):</span>
+                <span class="n">data_file_white</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">white_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;H5&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;h5&#39;</span><span class="p">):</span>
+                <span class="n">data_file_dark</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;xradia&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;TXRM&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;txrm&#39;</span><span class="p">):</span>
+                <span class="n">data_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">dataExtension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;XRM&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;xrm&#39;</span><span class="p">):</span>
+                <span class="n">data_file_white</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">white_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;XRM&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;xrm&#39;</span><span class="p">):</span>
+                <span class="n">data_file_dark</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        
+        <span class="n">projections_file_index</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">projections_digits</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">projections_digits</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">projections_zeros</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">projections_file_index</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;0&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">projections_digits</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">projections_zeros</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+                <span class="n">projections_file_index</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+        <span class="n">white_file_index</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">white_digits</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">white_digits</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">white_zeros</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">white_file_index</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;0&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">white_digits</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">white_zeros</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+                <span class="n">white_file_index</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+        <span class="n">dark_file_index</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dark_digits</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dark_digits</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">dark_zeros</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">dark_file_index</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;0&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">dark_digits</span><span class="o">-</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">dark_zeros</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+                <span class="n">dark_file_index</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+
+
+        <span class="c"># Data ------------------------------------------------</span>
+
+        <span class="c"># Start reading projections one-by-one.</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">projections_start</span><span class="p">,</span> <span class="n">projections_end</span><span class="p">,</span> <span class="n">projections_step</span><span class="p">)</span>
+        <span class="n">_file_name</span> <span class="o">=</span> <span class="s">&#39; &#39;</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">projections_digits</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">ind</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">_file_name</span> <span class="o">=</span> <span class="n">data_file</span> <span class="o">+</span> <span class="n">projections_file_index</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ind</span><span class="p">[</span><span class="n">m</span><span class="p">])</span> <span class="o">+</span> <span class="n">dataExtension</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Generating projection file names: [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">_file_name</span><span class="p">)</span>                    
+                    <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">_file_name</span><span class="p">):</span>
+                <span class="n">projection_exist</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Reading projection file: [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">_file_name</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;data type: [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="p">)</span>
+
+                <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">_file_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf4&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">hdf4</span><span class="p">(</span><span class="n">x_start</span><span class="o">=</span><span class="n">slices_start</span><span class="p">,</span>
+                                     <span class="n">x_end</span><span class="o">=</span><span class="n">slices_end</span><span class="p">,</span>
+                                     <span class="n">x_step</span><span class="o">=</span><span class="n">slices_step</span><span class="p">,</span>
+                                     <span class="n">array_name</span><span class="o">=</span><span class="s">&#39;data&#39;</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf5&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">hdf5_2d</span><span class="p">(</span><span class="n">x_start</span><span class="o">=</span><span class="n">slices_start</span><span class="p">,</span>
+                                     <span class="n">x_end</span><span class="o">=</span><span class="n">slices_end</span><span class="p">,</span>
+                                     <span class="n">x_step</span><span class="o">=</span><span class="n">slices_step</span><span class="p">,</span>
+                                     <span class="n">array_name</span><span class="o">=</span><span class="s">&#39;/entry/data/data&#39;</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;compressed_tiff&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">tiffc</span><span class="p">(</span><span class="n">x_start</span><span class="o">=</span><span class="n">slices_start</span><span class="p">,</span>
+                                      <span class="n">x_end</span><span class="o">=</span><span class="n">slices_end</span><span class="p">,</span>
+                                      <span class="n">x_step</span><span class="o">=</span><span class="n">slices_step</span><span class="p">,</span>
+                                      <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;spe&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">spe</span><span class="p">(</span><span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    <span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    <span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;nc&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">netcdf</span><span class="p">(</span><span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    <span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    <span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">)</span>
+ 
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;tiff&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">tiff</span><span class="p">(</span><span class="n">x_start</span><span class="o">=</span><span class="n">slices_start</span><span class="p">,</span>
+                                     <span class="n">x_end</span><span class="o">=</span><span class="n">slices_end</span><span class="p">,</span>
+                                     <span class="n">x_step</span><span class="o">=</span><span class="n">slices_step</span><span class="p">,</span>
+                                     <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="p">((</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;tiff&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;compressed_tiff&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf4&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf5&#39;</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># Get resolution once.</span>
+                        <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span> <span class="n">tmpdata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tmpdata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+                    <span class="n">input_data</span><span class="p">[</span><span class="n">m</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">tmpdata</span>
+
+                <span class="k">if</span> <span class="p">((</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;spe&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;nc&#39;</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># Get resolution once.</span>
+                        <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">tmpdata</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">input_data</span><span class="p">,</span> <span class="n">tmpdata</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c"># Update data.</span>
+        <span class="k">if</span> <span class="n">projection_exist</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">input_data</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">dtype</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Attempt reading projections from: [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>                    
+            <span class="k">if</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;h5&#39;</span><span class="p">):</span>
+                <span class="c"># Read the projections that are all in a single file</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Projection file: [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>                    
+                    <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+                    <span class="n">array_name</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">exchange_base</span><span class="p">,</span> <span class="s">&quot;data&quot;</span><span class="p">])</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">hdf5</span><span class="p">(</span><span class="n">z_start</span> <span class="o">=</span> <span class="n">projections_start</span><span class="p">,</span>
+                                    	<span class="n">z_end</span> <span class="o">=</span> <span class="n">projections_end</span><span class="p">,</span>
+                                    	<span class="n">z_step</span> <span class="o">=</span> <span class="n">projections_step</span><span class="p">,</span>
+                                        <span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    	<span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    	<span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">,</span>
+					<span class="n">x_start</span> <span class="o">=</span> <span class="n">pixels_start</span><span class="p">,</span>
+                                    	<span class="n">x_end</span> <span class="o">=</span> <span class="n">pixels_end</span><span class="p">,</span>
+                                    	<span class="n">x_step</span> <span class="o">=</span> <span class="n">pixels_step</span><span class="p">,</span>
+                                    	<span class="n">array_name</span><span class="o">=</span> <span class="n">array_name</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">tmpdata</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;nxs&#39;</span><span class="p">):</span>
+                <span class="c"># Read the projections that are all in a single file</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Projection file: [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>                    
+                    <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+                    <span class="n">array_type</span> <span class="o">=</span> <span class="s">&#39;projections&#39;</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">nxs</span><span class="p">(</span><span class="n">z_start</span> <span class="o">=</span> <span class="n">projections_start</span><span class="p">,</span>
+                                    	<span class="n">z_end</span> <span class="o">=</span> <span class="n">projections_end</span><span class="p">,</span>
+                                    	<span class="n">z_step</span> <span class="o">=</span> <span class="n">projections_step</span><span class="p">,</span>
+                                        <span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    	<span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    	<span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">,</span>
+					<span class="n">x_start</span> <span class="o">=</span> <span class="n">pixels_start</span><span class="p">,</span>
+                                    	<span class="n">x_end</span> <span class="o">=</span> <span class="n">pixels_end</span><span class="p">,</span>
+                                    	<span class="n">x_step</span> <span class="o">=</span> <span class="n">pixels_step</span><span class="p">,</span>
+                                    	<span class="n">array_type</span><span class="o">=</span> <span class="n">array_type</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">tmpdata</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;edf&#39;</span><span class="p">):</span>
+                <span class="c"># Read the projections that are all in a single file</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Projection file: [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>                    
+                    <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">edf</span><span class="p">(</span><span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    <span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    <span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">tmpdata</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;xradia&#39;</span><span class="p">):</span>
+                <span class="c"># Read the projections that are all in a single file</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Projection file: [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>                    
+                    <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">txrm</span><span class="p">(</span><span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    <span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    <span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">)</span>
+                    <span class="n">dtype</span> <span class="o">=</span> <span class="n">tmpdata</span><span class="o">.</span><span class="n">dtype</span>                    
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">tmpdata</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;dpt&#39;</span><span class="p">):</span>
+                <span class="c"># Read the projections that are all in a single file</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Projection file: [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>                    
+                    <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">dpt</span><span class="p">(</span><span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    <span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    <span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">tmpdata</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Projection file is mandatory&quot;</span><span class="p">)</span>
+            
+        <span class="c"># White ------------------------------------------------</span>
+
+        <span class="c"># Reading white fields.</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">white_start</span><span class="p">,</span> <span class="n">white_end</span><span class="p">,</span> <span class="n">white_step</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">white_digits</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">ind</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">_file_name</span> <span class="o">=</span> <span class="n">data_file_white</span> <span class="o">+</span> <span class="n">white_file_index</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ind</span><span class="p">[</span><span class="n">m</span><span class="p">])</span> <span class="o">+</span> <span class="n">dataExtension</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Generating white file names: [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">_file_name</span><span class="p">)</span>
+                    <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">_file_name</span><span class="p">):</span>
+                <span class="n">white_exist</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Reading white file: [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">_file_name</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;data type: [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="p">)</span>
+
+                <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">_file_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf4&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">hdf4</span><span class="p">(</span><span class="n">x_start</span><span class="o">=</span><span class="n">slices_start</span><span class="p">,</span>
+                                     <span class="n">x_end</span><span class="o">=</span><span class="n">slices_end</span><span class="p">,</span>
+                                     <span class="n">x_step</span><span class="o">=</span><span class="n">slices_step</span><span class="p">,</span>
+                                     <span class="n">array_name</span><span class="o">=</span><span class="s">&#39;data&#39;</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf5&#39;</span><span class="p">):</span>
+                    <span class="c"># to check on real data set from APS 15-ID</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">hdf5_2d</span><span class="p">(</span><span class="n">x_start</span><span class="o">=</span><span class="n">slices_start</span><span class="p">,</span>
+                                     <span class="n">x_end</span><span class="o">=</span><span class="n">slices_end</span><span class="p">,</span>
+                                     <span class="n">x_step</span><span class="o">=</span><span class="n">slices_step</span><span class="p">,</span>
+                                     <span class="n">array_name</span><span class="o">=</span><span class="s">&#39;data&#39;</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;compressed_tiff&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">tiffc</span><span class="p">(</span><span class="n">x_start</span><span class="o">=</span><span class="n">slices_start</span><span class="p">,</span>
+                                      <span class="n">x_end</span><span class="o">=</span><span class="n">slices_end</span><span class="p">,</span>
+                                      <span class="n">x_step</span><span class="o">=</span><span class="n">slices_step</span><span class="p">,</span>
+                                      <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;spe&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">spe</span><span class="p">(</span><span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    <span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    <span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">)</span>
+
+
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;nc&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">netcdf</span><span class="p">(</span><span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    <span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    <span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;tiff&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">tiff</span><span class="p">(</span><span class="n">x_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                     <span class="n">x_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                     <span class="n">x_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">,</span>
+                                     <span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="p">((</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;tiff&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;compressed_tiff&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf4&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf5&#39;</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># Get resolution once.</span>
+                        <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
+                                             <span class="n">tmpdata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                             <span class="n">tmpdata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                                             <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+                    <span class="n">input_data</span><span class="p">[</span><span class="n">m</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">tmpdata</span>
+
+                <span class="k">if</span> <span class="p">((</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;spe&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;nc&#39;</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># Get resolution once.</span>
+                        <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">tmpdata</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">input_data</span><span class="p">,</span> <span class="n">tmpdata</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c"># Update white data.</span>
+        <span class="k">if</span> <span class="n">white_exist</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_white</span> <span class="o">=</span> <span class="n">input_data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Attempt reading white from file: [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>                    
+            <span class="k">if</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;h5&#39;</span><span class="p">):</span>
+                <span class="c"># Read the whites that are all in a single file</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;White file: [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>                    
+                    <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">hdf5</span><span class="p">(</span><span class="n">z_start</span> <span class="o">=</span> <span class="n">white_start</span><span class="p">,</span>
+                                    	<span class="n">z_end</span> <span class="o">=</span> <span class="n">white_end</span><span class="p">,</span>
+                                    	<span class="n">z_step</span> <span class="o">=</span> <span class="n">white_step</span><span class="p">,</span>
+                                        <span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    	<span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    	<span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">,</span>
+                                        <span class="n">x_start</span> <span class="o">=</span> <span class="n">pixels_start</span><span class="p">,</span>
+                                    	<span class="n">x_end</span> <span class="o">=</span> <span class="n">pixels_end</span><span class="p">,</span>
+                                    	<span class="n">x_step</span> <span class="o">=</span> <span class="n">pixels_step</span><span class="p">,</span>
+                                        <span class="n">array_name</span><span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">exchange_base</span><span class="p">,</span> <span class="s">&quot;data_white&quot;</span><span class="p">]))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_white</span> <span class="o">=</span> <span class="n">tmpdata</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># Fabricate one white field</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;White file [</span><span class="si">%s</span><span class="s">]. Generating white fields&quot;</span><span class="p">,</span> <span class="n">white_file_name</span><span class="p">)</span>  
+                    <span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_white</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;nxs&#39;</span><span class="p">):</span>
+                <span class="c"># Read the whites that are all in a single file</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;White file: [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>                    
+                    <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+                    <span class="n">array_type</span> <span class="o">=</span> <span class="s">&#39;white&#39;</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">nxs</span><span class="p">(</span><span class="n">z_start</span> <span class="o">=</span> <span class="n">white_start</span><span class="p">,</span>
+                                    	<span class="n">z_end</span> <span class="o">=</span> <span class="n">white_end</span><span class="p">,</span>
+                                    	<span class="n">z_step</span> <span class="o">=</span> <span class="n">white_step</span><span class="p">,</span>
+                                        <span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    	<span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    	<span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">,</span>
+					<span class="n">x_start</span> <span class="o">=</span> <span class="n">pixels_start</span><span class="p">,</span>
+                                    	<span class="n">x_end</span> <span class="o">=</span> <span class="n">pixels_end</span><span class="p">,</span>
+                                    	<span class="n">x_step</span> <span class="o">=</span> <span class="n">pixels_step</span><span class="p">,</span>
+                                    	<span class="n">array_type</span><span class="o">=</span> <span class="n">array_type</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_white</span> <span class="o">=</span> <span class="n">tmpdata</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;edf&#39;</span><span class="p">):</span>
+                <span class="c"># Read the whites that are all in a single file</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">white_file_name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;White file: [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">white_file_name</span><span class="p">)</span>                    
+                    <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">white_file_name</span><span class="p">)</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">edf</span><span class="p">(</span><span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    <span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    <span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_white</span> <span class="o">=</span> <span class="n">tmpdata</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># Fabricate one white field</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;White file [</span><span class="si">%s</span><span class="s">]. Generating white fields&quot;</span><span class="p">,</span> <span class="n">white_file_name</span><span class="p">)</span>  
+                    <span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_white</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;xradia&#39;</span><span class="p">):</span>
+                <span class="c"># Read the whites that are all in a single file</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">white_file_name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;White file: [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">white_file_name</span><span class="p">)</span>                    
+                    <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">white_file_name</span><span class="p">)</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">xrm</span><span class="p">(</span><span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    <span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    <span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_white</span> <span class="o">=</span> <span class="n">tmpdata</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># Fabricate one white field</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;White file [</span><span class="si">%s</span><span class="s">]. Generating white fields&quot;</span><span class="p">,</span> <span class="n">white_file_name</span><span class="p">)</span>  
+                    <span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_white</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;dpt&#39;</span><span class="p">):</span>
+                <span class="c"># Read the whites that are all in a single file</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">white_file_name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;White file: [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">white_file_name</span><span class="p">)</span>                    
+                    <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">white_file_name</span><span class="p">)</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">dpt</span><span class="p">(</span><span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    <span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    <span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_white</span> <span class="o">=</span> <span class="n">tmpdata</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># Fabricate one white field</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;White file [</span><span class="si">%s</span><span class="s">]. Generating white fields&quot;</span><span class="p">,</span> <span class="n">white_file_name</span><span class="p">)</span>  
+                    <span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_white</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># Fabricate one white field</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;White file is missing. Generating white fields&quot;</span><span class="p">)</span>
+                <span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_white</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+        <span class="c"># Dark ------------------------------------------------</span>
+
+        <span class="c"># Reading dark fields.</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">dark_start</span><span class="p">,</span> <span class="n">dark_end</span><span class="p">,</span> <span class="n">dark_step</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dark_digits</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">ind</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">_file_name</span> <span class="o">=</span> <span class="n">data_file_dark</span> <span class="o">+</span> <span class="n">dark_file_index</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ind</span><span class="p">[</span><span class="n">m</span><span class="p">])</span> <span class="o">+</span> <span class="n">dataExtension</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Generating dark file names: [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">_file_name</span><span class="p">)</span>
+                    <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">_file_name</span><span class="p">):</span>
+                <span class="n">dark_exist</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Reading dark file: [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">_file_name</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;data type: [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="p">)</span>
+
+                <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">_file_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf4&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">hdf4</span><span class="p">(</span><span class="n">x_start</span><span class="o">=</span><span class="n">slices_start</span><span class="p">,</span>
+                                     <span class="n">x_end</span><span class="o">=</span><span class="n">slices_end</span><span class="p">,</span>
+                                     <span class="n">x_step</span><span class="o">=</span><span class="n">slices_step</span><span class="p">,</span>
+                                     <span class="n">array_name</span><span class="o">=</span><span class="s">&#39;data&#39;</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf5&#39;</span><span class="p">):</span>
+                    <span class="c"># to check on real data set from APS 15-ID</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">hdf5_2d</span><span class="p">(</span><span class="n">x_start</span><span class="o">=</span><span class="n">slices_start</span><span class="p">,</span>
+                                     <span class="n">x_end</span><span class="o">=</span><span class="n">slices_end</span><span class="p">,</span>
+                                     <span class="n">x_step</span><span class="o">=</span><span class="n">slices_step</span><span class="p">,</span>
+                                     <span class="n">array_name</span><span class="o">=</span><span class="s">&#39;data&#39;</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;compressed_tiff&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">tiffc</span><span class="p">(</span><span class="n">x_start</span><span class="o">=</span><span class="n">slices_start</span><span class="p">,</span>
+                                      <span class="n">x_end</span><span class="o">=</span><span class="n">slices_end</span><span class="p">,</span>
+                                      <span class="n">x_step</span><span class="o">=</span><span class="n">slices_step</span><span class="p">,</span>
+                                      <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;spe&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">spe</span><span class="p">(</span><span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    <span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    <span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;nc&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">netcdf</span><span class="p">(</span><span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    <span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    <span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;tiff&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">tiff</span><span class="p">(</span><span class="n">x_start</span><span class="o">=</span><span class="n">slices_start</span><span class="p">,</span>
+                                     <span class="n">x_end</span><span class="o">=</span><span class="n">slices_end</span><span class="p">,</span>
+                                     <span class="n">x_step</span><span class="o">=</span><span class="n">slices_step</span><span class="p">,</span>
+                                     <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="p">((</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;tiff&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;compressed_tiff&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf4&#39;</span><span class="p">)</span> <span class="ow">or</span> 
+                    <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf5&#39;</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># Get resolution once.</span>
+                        <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
+                                             <span class="n">tmpdata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                             <span class="n">tmpdata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                                             <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+                    <span class="n">input_data</span><span class="p">[</span><span class="n">m</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">tmpdata</span>
+
+                <span class="k">if</span> <span class="p">((</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;spe&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;nc&#39;</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># Get resolution once.</span>
+                        <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">tmpdata</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">input_data</span><span class="p">,</span> <span class="n">tmpdata</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c"># Update dark data.</span>
+        <span class="k">if</span> <span class="n">dark_exist</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_dark</span> <span class="o">=</span> <span class="n">input_data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Attempt reading dark from file: [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>                    
+            <span class="k">if</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;h5&#39;</span><span class="p">):</span>
+                <span class="c"># Read the dark fields that are all in a single file</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Dark file: [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>                    
+                    <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">hdf5</span><span class="p">(</span><span class="n">z_start</span> <span class="o">=</span> <span class="n">dark_start</span><span class="p">,</span>
+                                    	<span class="n">z_end</span> <span class="o">=</span> <span class="n">dark_end</span><span class="p">,</span>
+                                    	<span class="n">z_step</span> <span class="o">=</span> <span class="n">dark_step</span><span class="p">,</span>
+                                        <span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    	<span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    	<span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">,</span>
+                                        <span class="n">x_start</span> <span class="o">=</span> <span class="n">pixels_start</span><span class="p">,</span>
+                                    	<span class="n">x_end</span> <span class="o">=</span> <span class="n">pixels_end</span><span class="p">,</span>
+                                    	<span class="n">x_step</span> <span class="o">=</span> <span class="n">pixels_step</span><span class="p">,</span>
+                                    	<span class="n">array_name</span><span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">exchange_base</span><span class="p">,</span> <span class="s">&quot;data_dark&quot;</span><span class="p">]))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_dark</span> <span class="o">=</span> <span class="n">tmpdata</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># Fabricate one dark field</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Dark file [</span><span class="si">%s</span><span class="s">]. Generating dark fields&quot;</span><span class="p">,</span> <span class="n">dark_file_name</span><span class="p">)</span>
+                    <span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_dark</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;nxs&#39;</span><span class="p">):</span>
+                <span class="c"># Read the projections that are all in a single file</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Dark file: [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>                    
+                    <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+                    <span class="n">array_type</span> <span class="o">=</span> <span class="s">&#39;dark&#39;</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">nxs</span><span class="p">(</span><span class="n">z_start</span> <span class="o">=</span> <span class="n">dark_start</span><span class="p">,</span>
+                                    	<span class="n">z_end</span> <span class="o">=</span> <span class="n">dark_end</span><span class="p">,</span>
+                                    	<span class="n">z_step</span> <span class="o">=</span> <span class="n">dark_step</span><span class="p">,</span>
+                                        <span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    	<span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    	<span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">,</span>
+					<span class="n">x_start</span> <span class="o">=</span> <span class="n">pixels_start</span><span class="p">,</span>
+                                    	<span class="n">x_end</span> <span class="o">=</span> <span class="n">pixels_end</span><span class="p">,</span>
+                                    	<span class="n">x_step</span> <span class="o">=</span> <span class="n">pixels_step</span><span class="p">,</span>
+                                    	<span class="n">array_type</span><span class="o">=</span> <span class="n">array_type</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_dark</span> <span class="o">=</span> <span class="n">tmpdata</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;edf&#39;</span><span class="p">):</span>
+                <span class="c"># Read the dark fields that are all in a single file</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Dark file: [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">dark_file_name</span><span class="p">)</span>                    
+                    <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">)</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">edf</span><span class="p">(</span><span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    <span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    <span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_dark</span> <span class="o">=</span> <span class="n">tmpdata</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># Fabricate one dark field</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Dark file [</span><span class="si">%s</span><span class="s">]. Generating dark fields&quot;</span><span class="p">,</span> <span class="n">dark_file_name</span><span class="p">)</span>
+                    <span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_dark</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;xradia&#39;</span><span class="p">):</span>
+                <span class="c"># Read the dark fields that are all in a single file</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Dark file: [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">dark_file_name</span><span class="p">)</span>                    
+                    <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">)</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">xrm</span><span class="p">(</span><span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    <span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    <span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_dark</span> <span class="o">=</span> <span class="n">tmpdata</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># Fabricate one dark field</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Dark file [</span><span class="si">%s</span><span class="s">]. Generating dark fields&quot;</span><span class="p">,</span> <span class="n">dark_file_name</span><span class="p">)</span>
+                    <span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_dark</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;dpt&#39;</span><span class="p">):</span>
+                <span class="c"># Read the dark fields that are all in a single file</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Dark file: [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">dark_file_name</span><span class="p">)</span>                    
+                    <span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">)</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">dpt</span><span class="p">(</span><span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                    <span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                    <span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_dark</span> <span class="o">=</span> <span class="n">tmpdata</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># Fabricate one dark field</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Dark file [</span><span class="si">%s</span><span class="s">]. Generating dark fields&quot;</span><span class="p">,</span> <span class="n">dark_file_name</span><span class="p">)</span>
+                    <span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_dark</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># Fabricate one dark field</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Dark file is missing. Generating dark fields&quot;</span><span class="p">)</span>
+                <span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_dark</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="c"># Theta ------------------------------------------------</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;h5&#39;</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Attempt reading angles from file: [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>                    
+		<span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Angle file: [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span> 
+                <span class="n">array_name</span> <span class="o">=</span> <span class="s">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">exchange_base</span><span class="p">,</span> <span class="s">&quot;theta&quot;</span><span class="p">])</span>                   
+		<span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">hdf5</span><span class="p">(</span><span class="n">z_start</span> <span class="o">=</span> <span class="n">projections_start</span><span class="p">,</span> 
+                        <span class="n">z_end</span> <span class="o">=</span> <span class="n">projections_end</span><span class="p">,</span>
+                        <span class="n">z_step</span> <span class="o">=</span> <span class="n">projections_step</span><span class="p">,</span>
+                        <span class="n">y_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                        <span class="n">y_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                        <span class="n">y_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">,</span>
+                        <span class="n">array_name</span><span class="o">=</span><span class="n">array_name</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">=</span> <span class="n">tmpdata</span>
+	<span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;xradia&#39;</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Attempt reading angles from file: [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>                    
+		<span class="n">f</span> <span class="o">=</span> <span class="n">XTomoReader</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+        	<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Angle file: [</span><span class="si">%s</span><span class="s">] exists&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>                    
+		<span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">txrm</span><span class="p">(</span><span class="n">array_name</span><span class="o">=</span><span class="s">&#39;theta&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">=</span> <span class="n">tmpdata</span>
+	<span class="k">else</span><span class="p">:</span>
+	        <span class="c"># Fabricate theta values</span>
+        	<span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        	<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nz</span><span class="p">)</span>
+        	<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Angle file missing&quot;</span><span class="p">)</span>                    
+        	<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Generating angles&quot;</span><span class="p">)</span>                    
+
+        	<span class="n">projections_angle_range</span> <span class="o">=</span> <span class="n">projections_angle_end</span> <span class="o">-</span> <span class="n">projections_angle_start</span>
+        	<span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">z</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">projections_angle_range</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_white</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_dark</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta</span>
+</div>
+    <span class="k">def</span> <span class="nf">_init_logging</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream_handler</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setup and start command line logging.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Top-level log setup.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;data exchange&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;DEBUG&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;INFO&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;WARN&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARN</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;WARNING&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;ERROR&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+
+        <span class="c"># Terminal stream log.</span>
+        <span class="n">ch</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;DEBUG&#39;</span><span class="p">:</span>
+            <span class="n">ch</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;INFO&#39;</span><span class="p">:</span>
+            <span class="n">ch</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;WARN&#39;</span><span class="p">:</span>
+            <span class="n">ch</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARN</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;WARNING&#39;</span><span class="p">:</span>
+            <span class="n">ch</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">==</span> <span class="s">&#39;ERROR&#39;</span><span class="p">:</span>
+            <span class="n">ch</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+
+        <span class="c"># Show date and time.</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%(asctime)s</span><span class="s"> - </span><span class="si">%(name)s</span><span class="s"> - </span><span class="si">%(levelname)s</span><span class="s"> - </span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">ch</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+
+        <span class="c"># Update logger.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">):</span> <span class="c"># For fist time create handlers.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Argonne National Laboratory.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

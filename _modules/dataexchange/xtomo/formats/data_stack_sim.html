@@ -1,0 +1,594 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataexchange.xtomo.formats.data_stack_sim &mdash; Data Exchange 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="author" title="About these documents" href="../../../../about.html" />
+    <link rel="top" title="Data Exchange 0.2 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for dataexchange.xtomo.formats.data_stack_sim</h1><div class="highlight"><pre>
+<span class="c"># </span>
+<span class="c">#   This file is part of Mantis, a Multivariate ANalysis Tool for Spectromicroscopy.</span>
+<span class="c"># </span>
+<span class="c">#   Copyright (C) 2011 Mirna Lerotic, 2nd Look</span>
+<span class="c">#   http://2ndlook.co/products.html</span>
+<span class="c">#   License: GNU GPL v3</span>
+<span class="c">#</span>
+<span class="c">#   Mantis is free software: you can redistribute it and/or modify</span>
+<span class="c">#   it under the terms of the GNU General Public License as published by</span>
+<span class="c">#   the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">#   any later version.</span>
+<span class="c">#</span>
+<span class="c">#   Mantis is distributed in the hope that it will be useful,</span>
+<span class="c">#   but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#   GNU General Public License for more details &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.interpolate</span>
+<span class="kn">import</span> <span class="nn">scipy.ndimage</span>
+<span class="kn">import</span> <span class="nn">datetime</span> 
+
+<span class="kn">import</span> <span class="nn">xradia_xrm</span>
+
+<span class="kn">import</span> <span class="nn">data_struct</span>
+
+<span class="c">#----------------------------------------------------------------------</span>
+<div class="viewcode-block" id="data"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_stack_sim.html#dataexchange.xtomo.formats.data_stack_sim.data">[docs]</a><span class="k">class</span> <span class="nc">data</span><span class="p">(</span><span class="n">xradia_xrm</span><span class="o">.</span><span class="n">xrm</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_struct</span><span class="p">):</span>
+        <span class="n">xradia_xrm</span><span class="o">.</span><span class="n">xrm</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+         
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_struct</span> <span class="o">=</span> <span class="n">data_struct</span>
+
+<span class="c">#----------------------------------------------------------------------   </span>
+<div class="viewcode-block" id="data.new_data"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_stack_sim.html#dataexchange.xtomo.formats.data_stack_sim.data.new_data">[docs]</a>    <span class="k">def</span> <span class="nf">new_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_cols</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_rows</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_ev</span> <span class="o">=</span> <span class="mi">0</span>
+               
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_dist</span> <span class="o">=</span> <span class="mi">0</span>       
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_dist</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ev</span> <span class="o">=</span> <span class="mi">0</span>         
+        <span class="bp">self</span><span class="o">.</span><span class="n">absdata</span> <span class="o">=</span> <span class="mi">0</span>
+
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">i0data</span> <span class="o">=</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evi0</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">od</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">od3d</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        
+<span class="c">#---------------------------------------------------------------------- </span></div>
+<div class="viewcode-block" id="data.read_txrm"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_stack_sim.html#dataexchange.xtomo.formats.data_stack_sim.data.read_txrm">[docs]</a>    <span class="k">def</span> <span class="nf">read_txrm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_data</span><span class="p">()</span>  
+        <span class="n">xradia_xrm</span><span class="o">.</span><span class="n">xrm</span><span class="o">.</span><span class="n">read_txrm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_struct</span><span class="p">)</span>
+        
+                
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale_bar</span><span class="p">()</span>
+        
+<span class="c">#---------------------------------------------------------------------- </span></div>
+<div class="viewcode-block" id="data.read_xrm"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_stack_sim.html#dataexchange.xtomo.formats.data_stack_sim.data.read_xrm">[docs]</a>    <span class="k">def</span> <span class="nf">read_xrm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_data</span><span class="p">()</span>  
+        <span class="n">xradia_xrm</span><span class="o">.</span><span class="n">xrm</span><span class="o">.</span><span class="n">read_xrm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_struct</span><span class="p">)</span>
+        
+                
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale_bar</span><span class="p">()</span>
+        
+        
+<span class="c">#----------------------------------------------------------------------   </span></div>
+<div class="viewcode-block" id="data.calc_histogram"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_stack_sim.html#dataexchange.xtomo.formats.data_stack_sim.data.calc_histogram">[docs]</a>    <span class="k">def</span> <span class="nf">calc_histogram</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c">#calculate average flux for each pixel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">averageflux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">absdata</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">averageflux</span>
+        
+        <span class="k">return</span>
+        
+        
+<span class="c">#----------------------------------------------------------------------   </span></div>
+<div class="viewcode-block" id="data.i0_from_histogram"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_stack_sim.html#dataexchange.xtomo.formats.data_stack_sim.data.i0_from_histogram">[docs]</a>    <span class="k">def</span> <span class="nf">i0_from_histogram</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fluxmin</span><span class="p">,</span> <span class="n">fluxmax</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">evi0hist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ev</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">i0datahist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ev</span><span class="p">)</span>
+
+        <span class="n">i0_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">fluxmin</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">averageflux</span><span class="p">)</span><span class="o">&amp;</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">averageflux</span><span class="o">&lt;</span><span class="n">fluxmax</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">i0_indices</span><span class="p">:</span>
+            <span class="n">invnumel</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">averageflux</span><span class="p">[</span><span class="n">i0_indices</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">ie</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ev</span><span class="p">):</span>  
+                <span class="n">thiseng_abs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">absdata</span><span class="p">[:,:,</span><span class="n">ie</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">i0datahist</span><span class="p">[</span><span class="n">ie</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">thiseng_abs</span><span class="p">[</span><span class="n">i0_indices</span><span class="p">])</span><span class="o">*</span><span class="n">invnumel</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">evi0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ev</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">i0data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">i0datahist</span> 
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">i0_dwell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_dwell</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_optical_density</span><span class="p">()</span>   
+        
+        
+    
+        <span class="k">return</span>    
+    
+<span class="c">#----------------------------------------------------------------------   </span></div>
+<div class="viewcode-block" id="data.set_i0"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_stack_sim.html#dataexchange.xtomo.formats.data_stack_sim.data.set_i0">[docs]</a>    <span class="k">def</span> <span class="nf">set_i0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i0data</span><span class="p">,</span> <span class="n">evdata</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">evi0</span> <span class="o">=</span> <span class="n">evdata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">i0data</span> <span class="o">=</span> <span class="n">i0data</span> 
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_optical_density</span><span class="p">()</span>
+        
+    
+        <span class="k">return</span>  
+    
+<span class="c">#----------------------------------------------------------------------   </span>
+<span class="c"># Normalize the data: calculate optical density matrix D </span></div>
+<div class="viewcode-block" id="data.calculate_optical_density"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_stack_sim.html#dataexchange.xtomo.formats.data_stack_sim.data.calculate_optical_density">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_optical_density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">n_pixels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_cols</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">n_rows</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">od</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_cols</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_rows</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ev</span><span class="p">))</span>
+        
+        <span class="c">#little hack to deal with rounding errors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evi0</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">evi0</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mf">0.001</span>
+        
+        <span class="n">fi0int</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evi0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">i0data</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s">&#39;cubic&#39;</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>      
+        <span class="n">i0</span> <span class="o">=</span> <span class="n">fi0int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ev</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dwell</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">i0_dwell</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+
+            <span class="n">i0</span> <span class="o">=</span> <span class="n">i0</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_dwell</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">i0_dwell</span><span class="p">)</span>
+        
+        <span class="c">#zero out all negative values in the image stack</span>
+        <span class="n">negative_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">absdata</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">negative_indices</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">absdata</span><span class="p">[</span><span class="n">negative_indices</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.01</span>
+                           
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ev</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">od</span><span class="p">[:,:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">absdata</span><span class="p">[:,:,</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">i0</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        
+        <span class="c">#clean up the result</span>
+        <span class="n">nan_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">od</span><span class="p">)</span> <span class="o">==</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nan_indices</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">od</span><span class="p">[</span><span class="n">nan_indices</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">od3d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">od</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        
+
+        <span class="c">#Optical density matrix is rearranged into n_pixelsxn_ev</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">od</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">od</span><span class="p">,</span> <span class="p">(</span><span class="n">n_pixels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ev</span><span class="p">),</span> <span class="n">order</span><span class="o">=</span><span class="s">&#39;F&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span>
+    
+<span class="c">#----------------------------------------------------------------------   </span></div>
+<div class="viewcode-block" id="data.scale_bar"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_stack_sim.html#dataexchange.xtomo.formats.data_stack_sim.data.scale_bar">[docs]</a>    <span class="k">def</span> <span class="nf">scale_bar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+           
+        <span class="n">x_start</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dist</span><span class="p">)</span>
+        <span class="n">x_stop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dist</span><span class="p">)</span>
+        <span class="n">bar_microns</span> <span class="o">=</span> <span class="mf">0.2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x_stop</span><span class="o">-</span><span class="n">x_start</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">bar_microns</span> <span class="o">&gt;=</span> <span class="mf">10.</span><span class="p">:</span>
+            <span class="n">bar_microns</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="mf">0.5</span><span class="o">+</span><span class="mf">0.1</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="mf">0.5</span><span class="o">+</span><span class="n">bar_microns</span><span class="p">))</span>
+            <span class="n">bar_string</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mf">0.01</span><span class="o">+</span><span class="n">bar_microns</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">bar_microns</span> <span class="o">&gt;=</span> <span class="mf">1.</span><span class="p">:</span>      
+            <span class="n">bar_microns</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mf">0.5</span><span class="o">+</span><span class="n">bar_microns</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">bar_microns</span> <span class="o">==</span> <span class="mf">1.</span><span class="p">:</span>
+                <span class="n">bar_string</span> <span class="o">=</span> <span class="s">&#39;1&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">bar_string</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mf">0.01</span><span class="o">+</span><span class="n">bar_microns</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bar_microns</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mf">0.1</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="mf">0.5</span><span class="o">+</span><span class="mi">10</span><span class="o">*</span><span class="n">bar_microns</span><span class="p">),</span><span class="mf">0.1</span><span class="p">)</span>
+            <span class="n">bar_string</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">bar_microns</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale_bar_string</span> <span class="o">=</span> <span class="n">bar_string</span>
+
+        <span class="c">#Matplotlib has flipped scales so I&#39;m using rows instead of cols!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale_bar_pixels_x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.5</span><span class="o">+</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_rows</span><span class="p">)</span><span class="o">*</span>
+                       <span class="nb">float</span><span class="p">(</span><span class="n">bar_microns</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x_stop</span><span class="o">-</span><span class="n">x_start</span><span class="p">)))</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale_bar_pixels_y</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.01</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">n_rows</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_bar_pixels_y</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scale_bar_pixels_y</span> <span class="o">=</span> <span class="mi">2</span>
+                       
+
+             
+             
+    
+<span class="c">#----------------------------------------------------------------------   </span></div>
+<div class="viewcode-block" id="data.write_xas"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_stack_sim.html#dataexchange.xtomo.formats.data_stack_sim.data.write_xas">[docs]</a>    <span class="k">def</span> <span class="nf">write_xas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">evdata</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="nb">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;*********************  X-ray Absorption Data  ********************&#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;*&#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Formula: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Common name: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Edge: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Acquisition mode: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Source and purity: &#39;</span> 
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Comments: Stack list ROI &quot;&quot;&#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Delta eV: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Min eV: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Max eV: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Y axis: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Contact person: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Write date: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Journal: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Authors: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Title: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Volume: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Issue number: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Year: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Pages: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Booktitle: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Editors: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Publisher: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;* Address: &#39;</span>
+        <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;*--------------------------------------------------------------&#39;</span>
+        <span class="k">for</span> <span class="n">ie</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ev</span><span class="p">):</span>
+            <span class="k">print</span><span class="o">&gt;&gt;</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\t</span><span class="si">%.6f</span><span class="se">\t</span><span class="si">%.6f</span><span class="s">&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">evdata</span><span class="p">[</span><span class="n">ie</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">ie</span><span class="p">])</span>
+        
+        <span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    
+        <span class="k">return</span>  
+    
+<span class="c">#----------------------------------------------------------------------   </span>
+<span class="c">#Read x-ray absorption spectrum</span></div>
+<div class="viewcode-block" id="data.read_xas"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_stack_sim.html#dataexchange.xtomo.formats.data_stack_sim.data.read_xas">[docs]</a>    <span class="k">def</span> <span class="nf">read_xas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        
+        <span class="n">spectrum_common_name</span> <span class="o">=</span> <span class="s">&#39; &#39;</span>
+ 
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+        
+        <span class="n">elist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ilist</span> <span class="o">=</span> <span class="p">[]</span>    
+    
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;*&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s">&#39;Common name&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="n">spectrum_common_name</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">e</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span> <span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span> 
+                <span class="n">elist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="n">ilist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                
+        <span class="n">spectrum_evdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elist</span><span class="p">)</span>
+        <span class="n">spectrum_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ilist</span><span class="p">)</span> 
+                
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">spectrum_evdata</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">&lt;</span><span class="n">spectrum_evdata</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">spectrum_evdata</span> <span class="o">=</span> <span class="n">spectrum_evdata</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">spectrum_data</span> <span class="o">=</span> <span class="n">spectrum_data</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">spectrum_evdata</span><span class="p">,</span> <span class="n">spectrum_data</span><span class="p">,</span> <span class="n">spectrum_common_name</span>
+        
+    
+<span class="c">#----------------------------------------------------------------------   </span>
+<span class="c">#Register images using Fourier Shift Theorem</span></div>
+<div class="viewcode-block" id="data.register_images"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_stack_sim.html#dataexchange.xtomo.formats.data_stack_sim.data.register_images">[docs]</a>    <span class="k">def</span> <span class="nf">register_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_image</span><span class="p">,</span> <span class="n">image2</span><span class="p">,</span> <span class="n">maxshift</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">have_ref_img_fft</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="n">have_ref_img_fft</span> <span class="o">==</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ref_fft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft2</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">ref_image</span><span class="p">)))</span>
+        <span class="n">img2_fft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft2</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">image2</span><span class="p">)))</span>
+        
+        <span class="n">fr</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ref_fft</span><span class="o">*</span><span class="n">img2_fft</span><span class="o">.</span><span class="n">conjugate</span><span class="p">())</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ref_fft</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">img2_fft</span><span class="p">))</span>
+        <span class="n">fr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft2</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">fr</span><span class="p">)))</span>
+        <span class="n">fr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fr</span><span class="p">)</span>
+        
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">ref_image</span><span class="o">.</span><span class="n">shape</span>
+        
+        <span class="n">xc</span><span class="p">,</span> <span class="n">yc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">fr</span><span class="p">),</span> <span class="n">shape</span><span class="p">)</span>
+        
+        <span class="c"># Limit the search to 1 pixel border</span>
+        <span class="k">if</span> <span class="n">xc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">xc</span><span class="o">=</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="n">xc</span> <span class="o">==</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">xc</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">2</span>
+            
+        <span class="k">if</span> <span class="n">yc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">yc</span><span class="o">=</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="n">yc</span> <span class="o">==</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">yc</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">2</span>
+            
+        <span class="c">#Use peak fit to find the shifts </span>
+        <span class="n">xpts</span> <span class="o">=</span> <span class="n">xc</span><span class="o">+</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ypts</span> <span class="o">=</span> <span class="n">fr</span><span class="p">[</span><span class="n">xpts</span><span class="p">,</span><span class="n">yc</span><span class="p">]</span>     
+        <span class="n">xf</span><span class="p">,</span> <span class="n">fit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peak_fit</span><span class="p">(</span><span class="n">xpts</span><span class="p">,</span> <span class="n">ypts</span><span class="p">)</span>
+
+        <span class="n">xpts</span> <span class="o">=</span> <span class="n">yc</span><span class="o">+</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ypts</span> <span class="o">=</span> <span class="n">fr</span><span class="p">[</span><span class="n">xc</span><span class="p">,</span><span class="n">xpts</span><span class="p">]</span>     
+        <span class="n">yf</span><span class="p">,</span> <span class="n">fit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peak_fit</span><span class="p">(</span><span class="n">xpts</span><span class="p">,</span> <span class="n">ypts</span><span class="p">)</span>   
+              
+        
+        <span class="n">xshift</span> <span class="o">=</span> <span class="n">xf</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="n">yshift</span> <span class="o">=</span> <span class="n">yf</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="mf">2.0</span>
+        
+                
+        <span class="k">return</span> <span class="n">xshift</span><span class="p">,</span> <span class="n">yshift</span><span class="p">,</span> <span class="n">fr</span>
+    
+
+<span class="c">#----------------------------------------------------------------------   </span>
+<span class="c">#Apply image registration</span></div>
+<div class="viewcode-block" id="data.apply_image_registration"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_stack_sim.html#dataexchange.xtomo.formats.data_stack_sim.data.apply_image_registration">[docs]</a>    <span class="k">def</span> <span class="nf">apply_image_registration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">xshift</span><span class="p">,</span> <span class="n">yshift</span><span class="p">):</span>
+        
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">nx</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ny</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        
+        <span class="n">outofboundariesval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">image</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="p">)</span>        
+        <span class="n">shifted_img</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">interpolation</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="n">image</span><span class="p">,[</span><span class="n">xshift</span><span class="p">,</span><span class="n">yshift</span><span class="p">],</span>
+                                                        <span class="n">mode</span><span class="o">=</span><span class="s">&#39;constant&#39;</span><span class="p">,</span> 
+                                                        <span class="n">cval</span><span class="o">=</span><span class="n">outofboundariesval</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">shifted_img</span>
+    
+<span class="c">#----------------------------------------------------------------------   </span>
+<span class="c">#Apply image registration</span></div>
+<div class="viewcode-block" id="data.crop_registed_images"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_stack_sim.html#dataexchange.xtomo.formats.data_stack_sim.data.crop_registed_images">[docs]</a>    <span class="k">def</span> <span class="nf">crop_registed_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">images</span><span class="p">,</span> <span class="n">xshifts</span><span class="p">,</span> <span class="n">yshifts</span><span class="p">):</span>
+        
+        <span class="n">min_xshift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">xshifts</span><span class="p">)</span>
+        <span class="n">max_xshift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">xshifts</span><span class="p">)</span>
+        
+        <span class="n">min_yshift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">yshifts</span><span class="p">)</span>
+        <span class="n">max_yshift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">yshifts</span><span class="p">)</span>
+        
+        <span class="c"># if the image is moved to the right (positive) we need to crop the left side </span>
+        <span class="n">xleft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">max_xshift</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">xleft</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">xleft</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c"># if the image is moved to the left (negative) we need to crop the right side </span>
+        <span class="n">xright</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_cols</span><span class="o">+</span><span class="n">min_xshift</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">xright</span><span class="o">&gt;</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_cols</span><span class="p">):</span>
+            <span class="n">xright</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_cols</span>
+        
+        <span class="n">ybottom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">max_yshift</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ybottom</span> <span class="o">&lt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">ybottom</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ytop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_rows</span><span class="o">+</span><span class="n">min_yshift</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ytop</span> <span class="o">&gt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_rows</span><span class="p">):</span>
+            <span class="n">ytop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_rows</span>
+            
+            
+        <span class="n">cropped_stack</span> <span class="o">=</span> <span class="n">images</span><span class="p">[</span><span class="n">xleft</span><span class="p">:</span><span class="n">xright</span><span class="p">,</span> <span class="n">ybottom</span><span class="p">:</span><span class="n">ytop</span><span class="p">,</span> <span class="p">:]</span>
+        
+        <span class="k">return</span> <span class="n">cropped_stack</span>
+
+
+<span class="c">#----------------------------------------------------------------------   </span>
+<span class="c">#Quadratic peak fit: Fits the 3 data pairs to y=a+bx+cx^2, returning fit=[a,b,c]&#39;</span>
+<span class="c">#  and xpeak at position of inflection&#39;</span></div>
+<div class="viewcode-block" id="data.peak_fit"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_stack_sim.html#dataexchange.xtomo.formats.data_stack_sim.data.peak_fit">[docs]</a>    <span class="k">def</span> <span class="nf">peak_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        
+        <span class="n">y1y0</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y2y0</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">x1x0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">x2x0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">x1x0sq</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">x2x0sq</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                
+        <span class="n">c_num</span><span class="o">=</span><span class="n">y2y0</span><span class="o">*</span><span class="n">x1x0</span><span class="o">-</span><span class="n">y1y0</span><span class="o">*</span><span class="n">x2x0</span>
+        <span class="n">c_denom</span><span class="o">=</span><span class="n">x2x0sq</span><span class="o">*</span><span class="n">x1x0</span><span class="o">-</span><span class="n">x1x0sq</span><span class="o">*</span><span class="n">x2x0</span>
+        
+        <span class="k">if</span> <span class="n">c_denom</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Divide by zero error&#39;</span>
+            <span class="k">return</span> 
+
+        <span class="n">c</span><span class="o">=</span><span class="n">c_num</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">c_denom</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x1x0</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Divide by zero error&#39;</span>
+            <span class="k">return</span>
+
+        <span class="n">b</span><span class="o">=</span><span class="p">(</span><span class="n">y1y0</span><span class="o">-</span><span class="n">c</span><span class="o">*</span><span class="n">x1x0sq</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">x1x0</span><span class="p">)</span>
+        <span class="n">a</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">b</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">c</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  
+        <span class="n">fit</span><span class="o">=</span><span class="p">[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">xpeak</span><span class="o">=</span><span class="mf">0.</span>
+            <span class="k">print</span> <span class="s">&#39;Cannot find xpeak&#39;</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c">#Constrain the fit to be within these three points. </span>
+            <span class="n">xpeak</span><span class="o">=-</span><span class="n">b</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">c</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">xpeak</span> <span class="o">&lt;</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">xpeak</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">xpeak</span> <span class="o">&gt;</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                <span class="n">xpeak</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="n">xpeak</span><span class="p">,</span> <span class="n">fit</span>
+        
+        
+<span class="c">#-----------------------------------------------------------------------------</span>
+<span class="c">#Despike image using Enhanced Lee Filter</span></div>
+<div class="viewcode-block" id="data.despike"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_stack_sim.html#dataexchange.xtomo.formats.data_stack_sim.data.despike">[docs]</a>    <span class="k">def</span> <span class="nf">despike</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">leefilt_percent</span> <span class="o">=</span> <span class="mf">50.0</span><span class="p">):</span>
+        
+        <span class="n">fimg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lee_filter</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+        
+        <span class="n">leefilt_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">fimg</span><span class="p">)</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="mf">0.01</span><span class="o">*</span><span class="n">leefilt_percent</span><span class="p">)</span><span class="o">*</span><span class="n">leefilt_max</span>
+    
+        
+        <span class="n">datadim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="n">ncols</span> <span class="o">=</span> <span class="n">datadim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">nrows</span> <span class="o">=</span>  <span class="n">datadim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+              
+        <span class="n">spikes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">image</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">)</span>
+        <span class="n">n_spikes</span> <span class="o">=</span> <span class="n">fimg</span><span class="p">[</span><span class="n">spikes</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+
+        <span class="n">result_img</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">n_spikes</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+
+            <span class="n">xsp</span> <span class="o">=</span> <span class="n">spikes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ysp</span> <span class="o">=</span> <span class="n">spikes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_spikes</span><span class="p">):</span>
+                <span class="n">ix</span> <span class="o">=</span> <span class="n">xsp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">iy</span> <span class="o">=</span> <span class="n">ysp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">print</span> <span class="n">ix</span><span class="p">,</span><span class="n">iy</span>
+                <span class="k">if</span> <span class="n">ix</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ix1</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">ix2</span> <span class="o">=</span> <span class="mi">2</span>
+                <span class="k">elif</span> <span class="n">ix</span> <span class="o">==</span> <span class="p">(</span><span class="n">ncols</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">ix1</span> <span class="o">=</span> <span class="n">ncols</span><span class="o">-</span><span class="mi">2</span>
+                    <span class="n">ix2</span> <span class="o">=</span> <span class="n">ncols</span> <span class="o">-</span><span class="mi">3</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ix1</span> <span class="o">=</span> <span class="n">ix</span> <span class="o">-</span> <span class="mi">1</span>
+                    <span class="n">ix2</span> <span class="o">=</span> <span class="n">ix</span> <span class="o">+</span> <span class="mi">1</span>
+                    
+                <span class="k">if</span> <span class="n">iy</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">iy1</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">iy2</span> <span class="o">=</span> <span class="mi">2</span>
+                <span class="k">elif</span> <span class="n">iy</span> <span class="o">==</span> <span class="p">(</span><span class="n">nrows</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">iy1</span> <span class="o">=</span> <span class="n">nrows</span><span class="o">-</span><span class="mi">2</span>
+                    <span class="n">iy2</span> <span class="o">=</span> <span class="n">nrows</span><span class="o">-</span><span class="mi">3</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">iy1</span> <span class="o">=</span> <span class="n">iy</span> <span class="o">-</span> <span class="mi">1</span>
+                    <span class="n">iy2</span> <span class="o">=</span> <span class="n">iy</span> <span class="o">+</span> <span class="mi">1</span>      
+                 
+                <span class="k">print</span> <span class="n">result_img</span><span class="p">[</span><span class="n">ix</span><span class="p">,</span><span class="n">iy</span><span class="p">]</span>
+                <span class="n">result_img</span><span class="p">[</span><span class="n">ix</span><span class="p">,</span><span class="n">iy</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.25</span><span class="o">*</span><span class="p">(</span><span class="n">image</span><span class="p">[</span><span class="n">ix1</span><span class="p">,</span><span class="n">iy</span><span class="p">]</span><span class="o">+</span><span class="n">image</span><span class="p">[</span><span class="n">ix2</span><span class="p">,</span><span class="n">iy</span><span class="p">]</span><span class="o">+</span>
+                                          <span class="n">image</span><span class="p">[</span><span class="n">ix</span><span class="p">,</span><span class="n">iy1</span><span class="p">]</span><span class="o">+</span><span class="n">image</span><span class="p">[</span><span class="n">ix</span><span class="p">,</span><span class="n">iy2</span><span class="p">])</span>  
+                <span class="k">print</span> <span class="n">result_img</span><span class="p">[</span><span class="n">ix</span><span class="p">,</span><span class="n">iy</span><span class="p">]</span>
+            
+        <span class="k">return</span> <span class="n">result_img</span>        
+                                        
+            
+<span class="c">#-----------------------------------------------------------------------------   </span>
+<span class="c"># Lee filter</span></div>
+<div class="viewcode-block" id="data.lee_filter"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_stack_sim.html#dataexchange.xtomo.formats.data_stack_sim.data.lee_filter">[docs]</a>    <span class="k">def</span> <span class="nf">lee_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
+    
+        <span class="n">nbox</span> <span class="o">=</span> <span class="mi">5</span> <span class="c">#The size of the filter box is 2N+1.  The default value is 5.</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="mf">5.0</span> <span class="c">#Estimate of the standard deviation.  The default is 5.</span>
+        
+        <span class="n">delta</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">nbox</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="c">#width of window</span>
+        
+        <span class="n">datadim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        
+        
+        <span class="n">n_cols</span> <span class="o">=</span> <span class="n">datadim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">n_rows</span> <span class="o">=</span>  <span class="n">datadim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        
+        <span class="n">Imean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_cols</span><span class="p">,</span><span class="n">n_rows</span><span class="p">))</span>
+        <span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">uniform_filter</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">nbox</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="n">Imean</span><span class="p">)</span>
+        
+        <span class="n">Imean2</span> <span class="o">=</span> <span class="n">Imean</span><span class="o">**</span><span class="mi">2</span>
+        
+        <span class="c">#variance</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_cols</span><span class="p">,</span><span class="n">n_rows</span><span class="p">))</span>
+        
+
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="n">n_cols</span><span class="o">-</span><span class="n">delta</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">-</span><span class="n">delta</span><span class="p">):</span>    
+                
+                <span class="n">z</span><span class="p">[</span><span class="n">l</span><span class="p">,</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">image</span><span class="p">[</span><span class="n">l</span><span class="o">-</span><span class="n">delta</span><span class="p">:</span><span class="n">l</span><span class="o">+</span><span class="n">delta</span><span class="p">,</span><span class="n">s</span><span class="o">-</span><span class="n">delta</span><span class="p">:</span><span class="n">s</span><span class="o">+</span><span class="n">delta</span><span class="p">]</span><span class="o">-</span><span class="n">Imean</span><span class="p">[</span><span class="n">l</span><span class="p">,</span><span class="n">s</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+                
+
+        <span class="n">z</span> <span class="o">=</span> <span class="n">z</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">nbox</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+        
+        <span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">z</span> <span class="o">+</span> <span class="n">Imean2</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="mf">1.0</span><span class="o">+</span><span class="n">sig</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">Imean2</span>
+        
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">z</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">n_ind</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">n_ind</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">z</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="n">lf_image</span> <span class="o">=</span> <span class="n">Imean</span> <span class="o">+</span> <span class="p">(</span><span class="n">image</span><span class="o">-</span><span class="n">Imean</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">z</span><span class="o">/</span><span class="p">(</span><span class="n">Imean2</span><span class="o">*</span><span class="n">sig</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">z</span><span class="p">))</span>
+        
+        <span class="k">return</span> <span class="n">lf_image</span>
+        
+        
+        
+        
+        </div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Argonne National Laboratory.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

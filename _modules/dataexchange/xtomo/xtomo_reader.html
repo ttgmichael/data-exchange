@@ -1,0 +1,982 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataexchange.xtomo.xtomo_reader &mdash; Data Exchange 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="top" title="Data Exchange 0.2 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for dataexchange.xtomo.xtomo_reader</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Read image data from various format files.</span>
+
+<span class="sd">This module provides low level file format support to `xtomo_importer`_ </span>
+
+<span class="sd">Supported image fomats include TIFF, PackBits and LZW encoded TIFF, </span>
+<span class="sd">HDF5 (Data Exchange and NeXuS), HDF4 (NeXuS), SPE, TXRM, XRM, EDF, </span>
+<span class="sd">DPT, netCDF. </span>
+
+<span class="sd">:Author:</span>
+<span class="sd">  `Francesco De Carlo &lt;mailto: decarlof@gmail.com&gt;`_</span>
+
+<span class="sd">:Organization:</span>
+<span class="sd">  Argonne National Laboratory, Argonne, IL 60439 USA</span>
+
+<span class="sd">:Version: 2014.08.15</span>
+
+<span class="sd">Requirements</span>
+<span class="sd">------------</span>
+<span class="sd">* `h5py &lt;http://www.h5py.org/&gt;`_ </span>
+<span class="sd">* `netCDF &lt;https://pypi.python.org/pypi/netCDF4&gt;`_  (optional for supporting APS 13-BM data)</span>
+<span class="sd">* `pyhdf &lt;https://pypi.python.org/pypi/pyhdf&gt;`_  (optional for supporting APS 2-BM data)</span>
+<span class="sd">* `PIL.Image &lt;http://www.pythonware.com/products/pil/&gt;`_ </span>
+<span class="sd">* `Tifffile.c 2013.01.18 &lt;http://www.lfd.uci.edu/~gohlke/&gt;`_ (optional for supporting Elettra data) (recommended for faster decoding of PackBits and LZW encoded strings)</span>
+
+<span class="sd">Notes</span>
+<span class="sd">-----</span>
+<span class="sd">PackBits and LZW encoded TIFF tested on little-endian platforms only.</span>
+
+<span class="sd">Examples</span>
+<span class="sd">--------</span>
+
+<span class="sd">&gt;&gt;&gt; f = XTomoReader(_file_name)</span>
+<span class="sd">&gt;&gt;&gt; if (data_type is &#39;hdf4&#39;):</span>
+<span class="sd">&gt;&gt;&gt;     tmpdata = f.hdf4(x_start=slices_start,</span>
+<span class="sd">&gt;&gt;&gt;                         x_end=slices_end,</span>
+<span class="sd">&gt;&gt;&gt;                         x_step=slices_step,</span>
+<span class="sd">&gt;&gt;&gt;                         array_name=&#39;data&#39;)</span>
+
+<span class="sd">.. _xtomo_importer: dataexchange.xtomo.xtomo_importer.html</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">from</span> <span class="nn">pyhdf</span> <span class="kn">import</span> <span class="n">SD</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span> 
+<span class="kn">import</span> <span class="nn">PIL.Image</span> <span class="kn">as</span> <span class="nn">Image</span>
+<span class="kn">import</span> <span class="nn">netCDF4</span> <span class="kn">as</span> <span class="nn">nc</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">misc</span>
+
+<span class="kn">import</span> <span class="nn">formats.xradia_xrm</span> <span class="kn">as</span> <span class="nn">xradia</span>
+<span class="kn">import</span> <span class="nn">formats.data_struct</span> <span class="kn">as</span> <span class="nn">dstruct</span>
+<span class="kn">import</span> <span class="nn">formats.data_spe</span> <span class="kn">as</span> <span class="nn">spe</span>
+
+<span class="kn">from</span> <span class="nn">formats.EdfFile</span> <span class="kn">import</span> <span class="n">EdfFile</span>
+<span class="kn">from</span> <span class="nn">formats.tifffile</span> <span class="kn">import</span> <span class="n">TiffFile</span>
+
+<div class="viewcode-block" id="XTomoReader"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_reader.html#dataexchange.xtomo.xtomo_reader.XTomoReader">[docs]</a><span class="k">class</span> <span class="nc">XTomoReader</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_name</span> <span class="o">=</span> <span class="n">file_name</span>
+
+<div class="viewcode-block" id="XTomoReader.hdf5"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_reader.html#dataexchange.xtomo.xtomo_reader.XTomoReader.hdf5">[docs]</a>    <span class="k">def</span> <span class="nf">hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">array_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+             <span class="n">x_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">x_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">x_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">y_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">y_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">y_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">z_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">z_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">z_step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Read 3-D tomographic projection data from a Data Exchange HDF5 file.</span>
+
+<span class="sd">        Opens ``file_name`` and reads the contents of the 3D array specified </span>
+<span class="sd">	    by ``array_name`` in the specified group of the HDF5 file.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        file_name : str</span>
+<span class="sd">            Input HDF5 file.</span>
+<span class="sd">        </span>
+<span class="sd">        array_name : str</span>
+<span class="sd">            Name of the array to be read at in the exchange group.</span>
+<span class="sd">        </span>
+<span class="sd">        x_start, x_end, x_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole ndarray.</span>
+<span class="sd">        </span>
+<span class="sd">        y_start, y_end, y_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole ndarray.</span>
+<span class="sd">        </span>
+<span class="sd">        z_start, z_end, z_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole ndarray.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        </span>
+<span class="sd">        out : ndarray</span>
+<span class="sd">            Returns the data as a matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Read data from file.</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">hdfdata</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">array_name</span><span class="p">]</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">array_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;theta&quot;</span><span class="p">):</span>
+			<span class="n">num_z</span> <span class="o">=</span> <span class="n">hdfdata</span><span class="o">.</span><span class="n">size</span>
+        		<span class="k">if</span> <span class="n">z_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            			<span class="n">z_end</span> <span class="o">=</span> <span class="n">num_z</span>        		
+			<span class="c"># Construct theta.</span>
+        		<span class="n">dataset</span> <span class="o">=</span> <span class="n">hdfdata</span><span class="p">[</span><span class="n">z_start</span><span class="p">:</span><span class="n">z_end</span><span class="p">:</span><span class="n">z_step</span><span class="p">]</span>
+		<span class="k">else</span><span class="p">:</span>	
+			<span class="n">num_z</span><span class="p">,</span> <span class="n">num_y</span><span class="p">,</span> <span class="n">num_x</span> <span class="o">=</span> <span class="n">hdfdata</span><span class="o">.</span><span class="n">shape</span>
+        		<span class="k">if</span> <span class="n">x_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            			<span class="n">x_end</span> <span class="o">=</span> <span class="n">num_x</span>
+        		<span class="k">if</span> <span class="n">y_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+        			<span class="n">y_end</span> <span class="o">=</span> <span class="n">num_y</span>
+        		<span class="k">if</span> <span class="n">z_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            			<span class="n">z_end</span> <span class="o">=</span> <span class="n">num_z</span>
+        		<span class="c"># Construct dataset.</span>
+        		<span class="n">dataset</span> <span class="o">=</span> <span class="n">hdfdata</span><span class="p">[</span><span class="n">z_start</span><span class="p">:</span><span class="n">z_end</span><span class="p">:</span><span class="n">z_step</span><span class="p">,</span>
+                          			<span class="n">y_start</span><span class="p">:</span><span class="n">y_end</span><span class="p">:</span><span class="n">y_step</span><span class="p">,</span>
+                          			<span class="n">x_start</span><span class="p">:</span><span class="n">x_end</span><span class="p">:</span><span class="n">x_step</span><span class="p">]</span>
+	<span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;FILE DOES NOT CONTAIN A VALID TOMOGRAPHY DATA SET&quot;</span>
+		<span class="n">dataset</span> <span class="o">=</span> <span class="bp">None</span>        
+
+	<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">dataset</span>
+                </div>
+<div class="viewcode-block" id="XTomoReader.nxs"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_reader.html#dataexchange.xtomo.xtomo_reader.XTomoReader.nxs">[docs]</a>    <span class="k">def</span> <span class="nf">nxs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">array_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+             <span class="n">x_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">x_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">x_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">y_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">y_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">y_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">z_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">z_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">z_step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Read 3-D tomographic projection data from a NeXuS HDF5 file.</span>
+
+<span class="sd">        Opens ``file_name`` and reads the contents of the 3D array specified </span>
+<span class="sd">	    by ``array_name`` in the specified group of the HDF5 file.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        file_name : str</span>
+<span class="sd">            Input HDF5 file.</span>
+<span class="sd">        </span>
+<span class="sd">        array_name : str</span>
+<span class="sd">            Name of the array to be read at in the NeXuS file.</span>
+<span class="sd">            Options are: projections, dark, white </span>
+<span class="sd">        </span>
+<span class="sd">        x_start, x_end, x_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole ndarray.</span>
+<span class="sd">        </span>
+<span class="sd">        y_start, y_end, y_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole ndarray.</span>
+<span class="sd">        </span>
+<span class="sd">        z_start, z_end, z_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole ndarray.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        </span>
+<span class="sd">        out : ndarray</span>
+<span class="sd">            Returns the data as a matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Read data from file.</span>
+        <span class="n">array_name</span> <span class="o">=</span> <span class="s">&#39;entry1/tomo_entry/instrument/detector/data&#39;</span>
+        <span class="n">image_key_name</span> <span class="o">=</span> <span class="s">&#39;entry1/tomo_entry/instrument/detector/image_key&#39;</span>
+        <span class="k">print</span> <span class="n">array_name</span>
+        <span class="k">print</span> <span class="n">array_type</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">array_type</span> <span class="o">==</span> <span class="s">&#39;projections&#39;</span><span class="p">):</span>
+            <span class="n">image_key_value</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">array_type</span> <span class="o">==</span> <span class="s">&#39;white&#39;</span><span class="p">):</span>
+            <span class="n">image_key_value</span> <span class="o">=</span> <span class="mi">1</span>                    
+        <span class="k">if</span> <span class="p">(</span><span class="n">array_type</span> <span class="o">==</span> <span class="s">&#39;dark&#39;</span><span class="p">):</span>
+            <span class="n">image_key_value</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="k">print</span> <span class="n">image_key_value</span>
+        
+        <span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+  	<span class="k">try</span><span class="p">:</span>
+		<span class="n">hdfdata</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">array_name</span><span class="p">]</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">array_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;theta&quot;</span><span class="p">):</span>
+			<span class="n">num_z</span> <span class="o">=</span> <span class="n">hdfdata</span><span class="o">.</span><span class="n">size</span>
+        		<span class="k">if</span> <span class="n">z_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            			<span class="n">z_end</span> <span class="o">=</span> <span class="n">num_z</span>        		
+			<span class="c"># Construct theta.</span>
+        		<span class="n">dataset</span> <span class="o">=</span> <span class="n">hdfdata</span><span class="p">[</span><span class="n">z_start</span><span class="p">:</span><span class="n">z_end</span><span class="p">:</span><span class="n">z_step</span><span class="p">]</span>
+		<span class="k">else</span><span class="p">:</span>	
+                        <span class="n">image_key</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">image_key_name</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                        <span class="n">image_location</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">image_key</span> <span class="o">==</span> <span class="n">image_key_value</span><span class="p">)</span>
+                        <span class="n">dataset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">hdfdata</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">image_location</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+			<span class="n">num_z</span><span class="p">,</span> <span class="n">num_y</span><span class="p">,</span> <span class="n">num_x</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shape</span>
+        		<span class="k">if</span> <span class="n">x_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            			<span class="n">x_end</span> <span class="o">=</span> <span class="n">num_x</span>
+        		<span class="k">if</span> <span class="n">y_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+        			<span class="n">y_end</span> <span class="o">=</span> <span class="n">num_y</span>
+        		<span class="k">if</span> <span class="n">z_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            			<span class="n">z_end</span> <span class="o">=</span> <span class="n">num_z</span>
+        		<span class="c"># Construct dataset.</span>
+                        <span class="k">print</span> <span class="s">&quot;Z:&quot;</span><span class="p">,</span> <span class="n">z_start</span><span class="p">,</span> <span class="n">z_end</span><span class="p">,</span> <span class="n">z_step</span>
+                        <span class="k">print</span> <span class="s">&quot;Y:&quot;</span><span class="p">,</span> <span class="n">y_start</span><span class="p">,</span> <span class="n">y_end</span><span class="p">,</span> <span class="n">y_step</span>
+                        <span class="k">print</span> <span class="s">&quot;X:&quot;</span><span class="p">,</span> <span class="n">x_start</span><span class="p">,</span> <span class="n">x_end</span><span class="p">,</span> <span class="n">x_step</span>
+        		<span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">z_start</span><span class="p">:</span><span class="n">z_end</span><span class="p">:</span><span class="n">z_step</span><span class="p">,</span>
+                          			<span class="n">y_start</span><span class="p">:</span><span class="n">y_end</span><span class="p">:</span><span class="n">y_step</span><span class="p">,</span>
+                          			<span class="n">x_start</span><span class="p">:</span><span class="n">x_end</span><span class="p">:</span><span class="n">x_step</span><span class="p">]</span>
+                        <span class="k">print</span> <span class="n">dataset</span><span class="o">.</span><span class="n">shape</span>
+	<span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;FILE DOES NOT CONTAIN A VALID TOMOGRAPHY DATA SET&quot;</span>
+		<span class="n">dataset</span> <span class="o">=</span> <span class="bp">None</span>        
+
+	<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">dataset</span>
+</div>
+<div class="viewcode-block" id="XTomoReader.hdf4"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_reader.html#dataexchange.xtomo.xtomo_reader.XTomoReader.hdf4">[docs]</a>    <span class="k">def</span> <span class="nf">hdf4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">array_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+             <span class="n">x_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">x_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">x_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">y_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">y_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">y_step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Read 2-D tomographic projection data from an HDF4 file.</span>
+
+<span class="sd">        Opens ``file_name`` and reads the contents</span>
+<span class="sd">        of the array specified by ``array_name`` in</span>
+<span class="sd">        the specified group of the HDF file.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        file_name : str</span>
+<span class="sd">            Input HDF file.</span>
+<span class="sd">        </span>
+<span class="sd">        array_name : str</span>
+<span class="sd">            Name of the array to be read at exchange group.</span>
+<span class="sd">        </span>
+<span class="sd">        x_start, x_end, x_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole ndarray.</span>
+<span class="sd">        </span>
+<span class="sd">        y_start, y_end, y_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole ndarray.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        </span>
+<span class="sd">        out : ndarray</span>
+<span class="sd">            Returns the data as a matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Read data from file.</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">SD</span><span class="o">.</span><span class="n">SD</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="n">sds</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">array_name</span><span class="p">)</span>
+        <span class="n">hdfdata</span> <span class="o">=</span> <span class="n">sds</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="n">sds</span><span class="o">.</span><span class="n">endaccess</span><span class="p">()</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+	
+        <span class="n">num_y</span><span class="p">,</span> <span class="n">num_x</span> <span class="o">=</span> <span class="n">hdfdata</span><span class="o">.</span><span class="n">shape</span>
+	<span class="k">if</span> <span class="n">x_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">x_end</span> <span class="o">=</span> <span class="n">num_x</span>
+        <span class="k">if</span> <span class="n">y_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">y_end</span> <span class="o">=</span> <span class="n">num_y</span>
+
+        <span class="c"># Construct dataset.</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">hdfdata</span><span class="p">[</span><span class="n">x_start</span><span class="p">:</span><span class="n">x_end</span><span class="p">:</span><span class="n">x_step</span><span class="p">,</span>
+                          <span class="n">y_start</span><span class="p">:</span><span class="n">y_end</span><span class="p">:</span><span class="n">y_step</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">dataset</span>
+        </div>
+<div class="viewcode-block" id="XTomoReader.hdf5_2d"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_reader.html#dataexchange.xtomo.xtomo_reader.XTomoReader.hdf5_2d">[docs]</a>    <span class="k">def</span> <span class="nf">hdf5_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">array_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+             <span class="n">x_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">x_end</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+             <span class="n">x_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">y_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">y_end</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+             <span class="n">y_step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Read 2-D tomographic projection data from an HDF5 file.</span>
+
+<span class="sd">        Opens ``file_name`` and reads the contents</span>
+<span class="sd">        of the array specified by ``array_name`` in</span>
+<span class="sd">        the specified group of the HDF file.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        file_name : str</span>
+<span class="sd">            Input HDF file.</span>
+<span class="sd">        </span>
+<span class="sd">        array_name : str</span>
+<span class="sd">            Name of the array to be read at exchange group.</span>
+<span class="sd">        </span>
+<span class="sd">        x_start, x_end, x_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole ndarray.</span>
+<span class="sd">        </span>
+<span class="sd">        y_start, y_end, y_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole ndarray.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        </span>
+<span class="sd">        out : ndarray</span>
+<span class="sd">            Returns the data as a matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Read data from file.</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">hdfdata</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">array_name</span><span class="p">]</span>
+
+        <span class="n">num_x</span><span class="p">,</span> <span class="n">num_y</span> <span class="o">=</span> <span class="n">hdfdata</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="n">x_end</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">x_end</span> <span class="o">=</span> <span class="n">num_x</span>
+        <span class="k">if</span> <span class="n">y_end</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">y_end</span> <span class="o">=</span> <span class="n">num_y</span>
+
+        <span class="c"># Construct dataset.</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">hdfdata</span><span class="p">[</span><span class="n">x_start</span><span class="p">:</span><span class="n">x_end</span><span class="p">:</span><span class="n">x_step</span><span class="p">,</span>
+                          <span class="n">y_start</span><span class="p">:</span><span class="n">y_end</span><span class="p">:</span><span class="n">y_step</span><span class="p">]</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">dataset</span>
+        </div>
+<div class="viewcode-block" id="XTomoReader.tiff"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_reader.html#dataexchange.xtomo.xtomo_reader.XTomoReader.tiff">[docs]</a>    <span class="k">def</span> <span class="nf">tiff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+             <span class="n">x_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">x_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">x_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">y_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">y_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">y_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint16&#39;</span>
+             <span class="p">):</span>
+             
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read 2-D tomographic projection data from a TIFF file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        file_name : str</span>
+<span class="sd">            Name of the input TIFF file.</span>
+<span class="sd">        </span>
+<span class="sd">        dtype : str, optional</span>
+<span class="sd">            Corresponding numpy data type of the TIFF file.</span>
+<span class="sd">        </span>
+<span class="sd">        x_start, x_end, x_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole ndarray.</span>
+<span class="sd">        </span>
+<span class="sd">        y_start, y_end, y_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole ndarray.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        </span>
+<span class="sd">        out : ndarray</span>
+<span class="sd">            Output 2-D matrix as numpy array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="c">#        This ONLY works on little-endian platforms only</span>
+<span class="c">#        im = Image.open(self.file_name)</span>
+<span class="c">#        out = np.fromstring(im.tostring(), dtype).reshape(</span>
+<span class="c">#                               tuple(list(im.size[::-1])))</span>
+
+
+<span class="c">#        This seeem to work on both big and little-endian platforms</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="n">num_x</span><span class="p">,</span> <span class="n">num_y</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="k">if</span> <span class="n">x_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">x_end</span> <span class="o">=</span> <span class="n">num_x</span>
+        <span class="k">if</span> <span class="n">y_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">y_end</span> <span class="o">=</span> <span class="n">num_y</span>
+        
+        <span class="c">#im.close()</span>
+        <span class="k">return</span> <span class="n">out</span><span class="p">[</span><span class="n">x_start</span><span class="p">:</span><span class="n">x_end</span><span class="p">:</span><span class="n">x_step</span><span class="p">,</span>
+                   <span class="n">y_start</span><span class="p">:</span><span class="n">y_end</span><span class="p">:</span><span class="n">y_step</span><span class="p">]</span>
+        </div>
+<div class="viewcode-block" id="XTomoReader.tiffc"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_reader.html#dataexchange.xtomo.xtomo_reader.XTomoReader.tiffc">[docs]</a>    <span class="k">def</span> <span class="nf">tiffc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+              <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;uint16&#39;</span><span class="p">,</span>
+              <span class="n">x_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+              <span class="n">x_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+              <span class="n">x_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+              <span class="n">y_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+              <span class="n">y_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+              <span class="n">y_step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read 2-D complex(!) tomographic projection data from a TIFF file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        file_name : str</span>
+<span class="sd">            Name of the input TIFF file.</span>
+<span class="sd">        </span>
+<span class="sd">        dtype : str, optional</span>
+<span class="sd">            Corresponding Numpy data type of the TIFF file.</span>
+<span class="sd">        </span>
+<span class="sd">        x_start, x_end, x_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole ndarray.</span>
+<span class="sd">        </span>
+<span class="sd">        y_start, y_end, y_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole ndarray.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        </span>
+<span class="sd">        out : ndarray</span>
+<span class="sd">            Output 2-D matrix as numpy array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">TiffFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">asarray</span><span class="p">()</span>
+
+        <span class="n">num_x</span><span class="p">,</span> <span class="n">num_y</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="n">x_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">x_end</span> <span class="o">=</span> <span class="n">num_x</span>
+        <span class="k">if</span> <span class="n">y_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">y_end</span> <span class="o">=</span> <span class="n">num_y</span>
+        
+        <span class="c">#im.close()</span>
+        <span class="k">return</span> <span class="n">out</span><span class="p">[</span><span class="n">x_start</span><span class="p">:</span><span class="n">x_end</span><span class="p">:</span><span class="n">x_step</span><span class="p">,</span>
+                   <span class="n">y_start</span><span class="p">:</span><span class="n">y_end</span><span class="p">:</span><span class="n">y_step</span><span class="p">]</span>
+        </div>
+<div class="viewcode-block" id="XTomoReader.txrm"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_reader.html#dataexchange.xtomo.xtomo_reader.XTomoReader.txrm">[docs]</a>    <span class="k">def</span> <span class="nf">txrm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">array_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+             <span class="n">x_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">x_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">x_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">y_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">y_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">y_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">z_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">z_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">z_step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Read 3-D tomographic projection data from a TXRM file </span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        file_name : str</span>
+<span class="sd">            Input txrm file.</span>
+<span class="sd">        </span>
+<span class="sd">        x_start, x_end, x_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        y_start, y_end, y_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        z_start, z_end, z_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        </span>
+<span class="sd">        out : array</span>
+<span class="sd">            Returns the data as a matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Read data from file.</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">xradia</span><span class="o">.</span><span class="n">xrm</span><span class="p">()</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">dstruct</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">reader</span><span class="o">.</span><span class="n">read_txrm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span><span class="n">array</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">array_name</span> <span class="o">==</span> <span class="s">&quot;theta&quot;</span><span class="p">):</span>
+                <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">exchange</span><span class="o">.</span><span class="n">angles</span><span class="p">)</span>                
+                <span class="n">num_z</span> <span class="o">=</span> <span class="n">theta</span><span class="o">.</span><span class="n">size</span>
+        	<span class="k">if</span> <span class="n">z_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">z_end</span> <span class="o">=</span> <span class="n">num_z</span>
+		<span class="c"># Construct theta.</span>
+        	<span class="n">dataset</span> <span class="o">=</span> <span class="n">theta</span><span class="p">[</span><span class="n">z_start</span><span class="p">:</span><span class="n">z_end</span><span class="p">:</span><span class="n">z_step</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">exchange</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">num_x</span><span class="p">,</span> <span class="n">num_y</span><span class="p">,</span> <span class="n">num_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">exchange</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">num_z</span><span class="p">,</span> <span class="n">num_y</span><span class="p">,</span> <span class="n">num_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">x_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">x_end</span> <span class="o">=</span> <span class="n">num_x</span>
+                <span class="k">if</span> <span class="n">y_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">y_end</span> <span class="o">=</span> <span class="n">num_y</span>
+                <span class="k">if</span> <span class="n">z_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">z_end</span> <span class="o">=</span> <span class="n">num_z</span>
+                <span class="c"># Construct dataset from desired z, y, x.</span>
+                <span class="n">dataset</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">z_start</span><span class="p">:</span><span class="n">z_end</span><span class="p">:</span><span class="n">z_step</span><span class="p">,</span>
+                                <span class="n">y_start</span><span class="p">:</span><span class="n">y_end</span><span class="p">:</span><span class="n">y_step</span><span class="p">,</span>
+                                <span class="n">x_start</span><span class="p">:</span><span class="n">x_end</span><span class="p">:</span><span class="n">x_step</span><span class="p">]</span>                
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="n">dataset</span>
+       </div>
+<div class="viewcode-block" id="XTomoReader.xrm"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_reader.html#dataexchange.xtomo.xtomo_reader.XTomoReader.xrm">[docs]</a>    <span class="k">def</span> <span class="nf">xrm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">x_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">x_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">x_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">y_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">y_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">y_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">z_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">z_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">z_step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Read 3-D tomographic projection data from an XRM file.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        file_name : str</span>
+<span class="sd">            Input xrm file.</span>
+<span class="sd">        </span>
+<span class="sd">        x_start, x_end, x_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        y_start, y_end, y_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        z_start, z_end, z_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        </span>
+<span class="sd">        out : array</span>
+<span class="sd">            Returns the data as a matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Read data from file.</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">xradia</span><span class="o">.</span><span class="n">xrm</span><span class="p">()</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">dstruct</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">reader</span><span class="o">.</span><span class="n">read_xrm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span><span class="n">array</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">exchange</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">num_x</span><span class="p">,</span> <span class="n">num_y</span><span class="p">,</span> <span class="n">num_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">exchange</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">num_z</span><span class="p">,</span> <span class="n">num_y</span><span class="p">,</span> <span class="n">num_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">x_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">x_end</span> <span class="o">=</span> <span class="n">num_x</span>
+            <span class="k">if</span> <span class="n">y_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">y_end</span> <span class="o">=</span> <span class="n">num_y</span>
+            <span class="k">if</span> <span class="n">z_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">z_end</span> <span class="o">=</span> <span class="n">num_z</span>
+            <span class="c"># Construct dataset from desired z, y, x.</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">z_start</span><span class="p">:</span><span class="n">z_end</span><span class="p">:</span><span class="n">z_step</span><span class="p">,</span>
+                            <span class="n">y_start</span><span class="p">:</span><span class="n">y_end</span><span class="p">:</span><span class="n">y_step</span><span class="p">,</span>
+                            <span class="n">x_start</span><span class="p">:</span><span class="n">x_end</span><span class="p">:</span><span class="n">x_step</span><span class="p">]</span>                
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="n">dataset</span>
+        </div>
+<div class="viewcode-block" id="XTomoReader.spe"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_reader.html#dataexchange.xtomo.xtomo_reader.XTomoReader.spe">[docs]</a>    <span class="k">def</span> <span class="nf">spe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">x_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">x_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">x_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">y_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">y_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">y_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">z_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">z_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">z_step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Read 3-D tomographic projection data from a SPE file.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        file_name : str</span>
+<span class="sd">            Input spe file.</span>
+
+<span class="sd">        x_start, x_end, x_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        y_start, y_end, y_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        z_start, z_end, z_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        </span>
+<span class="sd">        out : array</span>
+<span class="sd">            Returns the data as a matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">spe_data</span> <span class="o">=</span> <span class="n">spe</span><span class="o">.</span><span class="n">PrincetonSPEFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">spe_data</span><span class="o">.</span><span class="n">getData</span><span class="p">()</span>
+        <span class="n">num_z</span><span class="p">,</span> <span class="n">num_y</span><span class="p">,</span> <span class="n">num_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">x_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">x_end</span> <span class="o">=</span> <span class="n">num_x</span>
+        <span class="k">if</span> <span class="n">y_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">y_end</span> <span class="o">=</span> <span class="n">num_y</span>
+        <span class="k">if</span> <span class="n">z_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">z_end</span> <span class="o">=</span> <span class="n">num_z</span>
+
+        <span class="c"># Construct dataset from desired y.</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">z_start</span><span class="p">:</span><span class="n">z_end</span><span class="p">:</span><span class="n">z_step</span><span class="p">,</span>
+                        <span class="n">y_start</span><span class="p">:</span><span class="n">y_end</span><span class="p">:</span><span class="n">y_step</span><span class="p">,</span>
+                        <span class="n">x_start</span><span class="p">:</span><span class="n">x_end</span><span class="p">:</span><span class="n">x_step</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">dataset</span>
+        </div>
+<div class="viewcode-block" id="XTomoReader.edf"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_reader.html#dataexchange.xtomo.xtomo_reader.XTomoReader.edf">[docs]</a>    <span class="k">def</span> <span class="nf">edf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">x_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">x_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">x_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">y_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">y_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">y_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">z_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">z_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">z_step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Read 3-D tomographic projection data from an EDF (ESRF) file.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        file_name : str</span>
+<span class="sd">            Input edf file.</span>
+<span class="sd">            </span>
+<span class="sd">        x_start, x_end, x_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        y_start, y_end, y_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        z_start, z_end, z_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        </span>
+<span class="sd">        out : array</span>
+<span class="sd">            Returns the data as a matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+ 
+        <span class="c"># Read data from file.</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">EdfFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="n">access</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">dic</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">GetStaticHeader</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">f</span><span class="o">.</span><span class="n">NumImages</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">dic</span><span class="p">[</span><span class="s">&#39;Dim_2&#39;</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">dic</span><span class="p">[</span><span class="s">&#39;Dim_1&#39;</span><span class="p">])))</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">ar</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tmpdata</span><span class="p">):</span>
+            <span class="n">tmpdata</span><span class="p">[</span><span class="n">i</span><span class="p">::]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">GetData</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+        <span class="n">num_z</span><span class="p">,</span> <span class="n">num_y</span><span class="p">,</span> <span class="n">num_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">tmpdata</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">x_end</span> <span class="o">=</span> <span class="n">num_x</span>
+        <span class="k">if</span> <span class="n">y_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">y_end</span> <span class="o">=</span> <span class="n">num_y</span>
+        <span class="k">if</span> <span class="n">z_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">z_end</span> <span class="o">=</span> <span class="n">num_z</span>
+
+        <span class="c"># Construct dataset from desired y.</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">tmpdata</span><span class="p">[</span><span class="n">z_start</span><span class="p">:</span><span class="n">z_end</span><span class="p">:</span><span class="n">z_step</span><span class="p">,</span>
+                          <span class="n">y_start</span><span class="p">:</span><span class="n">y_end</span><span class="p">:</span><span class="n">y_step</span><span class="p">,</span>
+                          <span class="n">x_start</span><span class="p">:</span><span class="n">x_end</span><span class="p">:</span><span class="n">x_step</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">dataset</span>
+        </div>
+<div class="viewcode-block" id="XTomoReader.dpt"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_reader.html#dataexchange.xtomo.xtomo_reader.XTomoReader.dpt">[docs]</a>    <span class="k">def</span> <span class="nf">dpt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">x_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">x_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">x_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">y_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">y_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">y_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">z_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">z_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">z_step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Read 3-D tomographic projection data from a DPT (SRC) file.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        file_name : str</span>
+<span class="sd">            Input dpt file.</span>
+<span class="sd">            </span>
+<span class="sd">        x_start, x_end, x_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        y_start, y_end, y_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        z_start, z_end, z_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        </span>
+<span class="sd">        out : array</span>
+<span class="sd">            Returns the data as a matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+ 
+        <span class="c"># Read data from file.</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="c"># Count the number of projections</span>
+        <span class="nb">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">num_of_projections</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">file</span><span class="p">)</span>
+        <span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c"># Determine image size and dimentions        </span>
+        <span class="nb">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">first_line</span> <span class="o">=</span> <span class="nb">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">firstlinelist</span><span class="o">=</span><span class="n">first_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;,&quot;</span><span class="p">)</span>
+
+        <span class="n">image_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">firstlinelist</span><span class="p">)</span><span class="o">-</span><span class="n">offset</span>
+        <span class="n">image_dim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">image_size</span><span class="p">))</span>
+        <span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">num_of_projections</span><span class="p">,</span> <span class="n">image_dim</span><span class="p">,</span> <span class="n">image_dim</span><span class="p">))</span>
+ 
+        <span class="n">num_z</span><span class="p">,</span> <span class="n">num_y</span><span class="p">,</span> <span class="n">num_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">tmpdata</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">image_dim</span><span class="o">**</span><span class="mi">2</span> <span class="o">==</span> <span class="n">image_size</span><span class="p">:</span> <span class="c"># check projections are square</span>
+            <span class="k">print</span> <span class="s">&quot;Reading &quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+            <span class="nb">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>      
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">file</span><span class="p">:</span>
+                <span class="n">linelist</span><span class="o">=</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;,&quot;</span><span class="p">)</span>
+
+                <span class="n">projection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">linelist</span><span class="p">)[</span><span class="n">offset</span><span class="p">:],</span> <span class="p">(</span><span class="n">image_dim</span> <span class="p">,</span><span class="n">image_dim</span><span class="p">))</span>
+
+                <span class="n">projection</span> <span class="o">=</span> <span class="n">projection</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+                <span class="n">projection</span> <span class="o">=</span> <span class="n">projection</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+                <span class="n">projection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">projection</span><span class="p">)</span>
+
+                <span class="n">tmpdata</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">0</span><span class="p">])::]</span> <span class="o">=</span> <span class="n">projection</span>
+
+            <span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">x_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">x_end</span> <span class="o">=</span> <span class="n">num_x</span>
+        <span class="k">if</span> <span class="n">y_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">y_end</span> <span class="o">=</span> <span class="n">num_y</span>
+        <span class="k">if</span> <span class="n">z_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">z_end</span> <span class="o">=</span> <span class="n">num_z</span>
+
+        <span class="c"># Construct dataset from desired y.</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">tmpdata</span><span class="p">[</span><span class="n">z_start</span><span class="p">:</span><span class="n">z_end</span><span class="p">:</span><span class="n">z_step</span><span class="p">,</span>
+                          <span class="n">y_start</span><span class="p">:</span><span class="n">y_end</span><span class="p">:</span><span class="n">y_step</span><span class="p">,</span>
+                          <span class="n">x_start</span><span class="p">:</span><span class="n">x_end</span><span class="p">:</span><span class="n">x_step</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">dataset</span>
+       </div>
+<div class="viewcode-block" id="XTomoReader.netcdf"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_reader.html#dataexchange.xtomo.xtomo_reader.XTomoReader.netcdf">[docs]</a>    <span class="k">def</span> <span class="nf">netcdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">x_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+               <span class="n">x_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+               <span class="n">x_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+               <span class="n">y_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+               <span class="n">y_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+               <span class="n">y_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+               <span class="n">z_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+               <span class="n">z_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+               <span class="n">z_step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Read 3-D tomographic projection data from a netCDF file.</span>
+
+<span class="sd">       </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        file_name : str</span>
+<span class="sd">            Input netcdf file.</span>
+<span class="sd">        </span>
+<span class="sd">        x_start, x_end, x_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        y_start, y_end, y_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        z_start, z_end, z_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        </span>
+<span class="sd">        out : array</span>
+<span class="sd">            Returns the data as a matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nc_data</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">nc_data</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s">&#39;array_data&#39;</span><span class="p">][:]</span>
+            
+        <span class="n">num_z</span><span class="p">,</span> <span class="n">num_y</span><span class="p">,</span> <span class="n">num_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">x_end</span> <span class="o">=</span> <span class="n">num_x</span>
+        <span class="k">if</span> <span class="n">y_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">y_end</span> <span class="o">=</span> <span class="n">num_y</span>
+        <span class="k">if</span> <span class="n">z_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">z_end</span> <span class="o">=</span> <span class="n">num_z</span>
+
+        <span class="c"># Construct dataset from desired y.</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">z_start</span><span class="p">:</span><span class="n">z_end</span><span class="p">:</span><span class="n">z_step</span><span class="p">,</span>
+                        <span class="n">y_start</span><span class="p">:</span><span class="n">y_end</span><span class="p">:</span><span class="n">y_step</span><span class="p">,</span>
+                        <span class="n">x_start</span><span class="p">:</span><span class="n">x_end</span><span class="p">:</span><span class="n">x_step</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">dataset</span>
+    </div>
+    <span class="k">def</span> <span class="nf">_hdf5_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                     <span class="n">array_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                     <span class="n">x_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                     <span class="n">x_end</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                     <span class="n">x_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                     <span class="n">y_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                     <span class="n">y_end</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                     <span class="n">y_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                     <span class="n">z_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                     <span class="n">z_end</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                     <span class="n">z_step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+        <span class="c"># expand the file_name</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+
+        <span class="c"># open the hdf file with context manager so it will always close</span>
+        <span class="c"># properly, even if there are uncaught errors.</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="c"># set up all of the slices, these should really be passed in</span>
+            <span class="c"># and follow the pattern</span>
+            <span class="c"># if a is None:</span>
+            <span class="c">#    a = slice(None, None, None)</span>
+            <span class="n">hdfdata</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">array_name</span><span class="p">]</span>
+            <span class="n">num_z</span><span class="p">,</span> <span class="n">num_y</span><span class="p">,</span> <span class="n">num_x</span> <span class="o">=</span> <span class="n">hdfdata</span><span class="o">.</span><span class="n">shape</span>
+
+            <span class="k">if</span> <span class="n">x_end</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            	<span class="n">x_end</span> <span class="o">=</span> <span class="n">num_x</span>
+            <span class="k">if</span> <span class="n">y_end</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            	<span class="n">y_end</span> <span class="o">=</span> <span class="n">num_y</span>
+            <span class="k">if</span> <span class="n">z_end</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            	<span class="n">z_end</span> <span class="o">=</span> <span class="n">num_z</span>
+
+            <span class="n">proj_slc</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">z_start</span><span class="p">,</span> <span class="n">z_end</span><span class="p">,</span> <span class="n">z_step</span><span class="p">)</span>
+            <span class="n">slices_slc</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">y_start</span><span class="p">,</span> <span class="n">y_end</span><span class="p">,</span> <span class="n">y_step</span><span class="p">)</span>
+            <span class="n">pixel_slc</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">x_start</span><span class="p">,</span> <span class="n">x_end</span><span class="p">,</span> <span class="n">x_step</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">array_name</span> <span class="o">==</span> <span class="s">&quot;/exchange/theta&quot;</span><span class="p">):</span>
+                <span class="c"># read the theta data</span>
+		<span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">array_name</span><span class="p">][</span><span class="n">proj_slc</span><span class="p">,</span> <span class="p">]</span>
+                <span class="c"># add a check that data is not None</span>
+                <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_no_data_err</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">file</span><span class="o">=</span><span class="n">file_name</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">array_name</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># read the data</span>
+		<span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">array_name</span><span class="p">][</span><span class="n">proj_slc</span><span class="p">,</span> <span class="n">slices_slc</span><span class="p">,</span> <span class="n">pixel_slc</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_no_data_err</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">file</span><span class="o">=</span><span class="n">file_name</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">array_name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_dset_read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f_in</span><span class="p">,</span> <span class="n">dset_name</span><span class="p">,</span> <span class="n">slice_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function for reading data sets that might not exist with arbitrary slices</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        f_in : h5py.Group</span>
+<span class="sd">           Open file or group</span>
+
+<span class="sd">        dset_name : str</span>
+<span class="sd">           name of dataset to try to read</span>
+
+<span class="sd">        slice_list : list or tuple</span>
+<span class="sd">           slice object to use slicing the data set.  length needs to math</span>
+<span class="sd">           the number of dimensions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># try to read the data</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">out_data</span> <span class="o">=</span> <span class="n">f_in</span><span class="p">[</span><span class="n">dset_name</span><span class="p">][</span><span class="n">slice_list</span><span class="p">]</span>
+        <span class="c"># if KeyError is raised (because the data set does not exist)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="c"># set data to None</span>
+            <span class="n">out_data</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># return the data</span>
+        <span class="k">return</span> <span class="n">out_data</span>
+
+    <span class="n">_no_data_err</span> <span class="o">=</span> <span class="s">&quot;{file} does not contain {tag}&quot;</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Argonne National Laboratory.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

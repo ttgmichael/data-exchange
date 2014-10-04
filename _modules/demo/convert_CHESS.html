@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>demo.convert_CHESS &mdash; Data Exchange 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="Data Exchange 0.2 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for demo.convert_CHESS</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. module:: convert_CHESS.py</span>
+<span class="sd">   :platform: Unix</span>
+<span class="sd">   :synopsis: Convert CHESS TIFF files in data exchange.</span>
+
+<span class="sd">Example on how to use the `xtomo_raw`_ module to read CHESS TIFF raw tomographic data and save them as Data Exchange</span>
+
+<span class="sd">:Author:</span>
+<span class="sd">  `Francesco De Carlo &lt;mailto: decarlof@gmail.com&gt;`_</span>
+
+<span class="sd">:Organization:</span>
+<span class="sd">  Argonne National Laboratory, Argonne, IL 60439 USA</span>
+
+<span class="sd">:Version: 2014.08.15</span>
+
+<span class="sd">.. _xtomo_raw: dataexchange.xtomo.xtomo_importer.html</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">dataexchange.xtomo.xtomo_importer</span> <span class="kn">as</span> <span class="nn">dx</span>
+<span class="kn">import</span> <span class="nn">dataexchange.xtomo.xtomo_exporter</span> <span class="kn">as</span> <span class="nn">ex</span>
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../resources/demo.convert_CHESS.html#demo.convert_CHESS.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+
+    <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/CHESS/scan1/scan1_.tiff&#39;</span>
+    <span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/CHESS/scan1/scan1_dark_.tiff&#39;</span>
+    <span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/CHESS/scan1/scan1_white_.tiff&#39;</span>
+
+    <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/tmp/CHESS.h5&#39;</span>
+
+    <span class="n">sample_name</span> <span class="o">=</span> <span class="s">&#39;Dummy&#39;</span>
+
+    <span class="n">projections_start</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">projections_end</span> <span class="o">=</span> <span class="mi">361</span>
+    <span class="n">white_start</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">white_end</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">white_step</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">dark_start</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">dark_end</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">dark_step</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">mydata</span> <span class="o">=</span> <span class="n">dx</span><span class="o">.</span><span class="n">Import</span><span class="p">()</span>
+    <span class="c"># Read series of images</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">white</span><span class="p">,</span> <span class="n">dark</span><span class="p">,</span> <span class="n">theta</span> <span class="o">=</span> <span class="n">mydata</span><span class="o">.</span><span class="n">xtomo_raw</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span>
+                                                       <span class="n">projections_start</span> <span class="o">=</span> <span class="n">projections_start</span><span class="p">,</span>
+                                                       <span class="n">projections_end</span> <span class="o">=</span> <span class="n">projections_end</span><span class="p">,</span>
+                                                       <span class="n">projections_digits</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+                                                       <span class="n">projections_zeros</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                                                       <span class="n">log</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span>
+                                                    <span class="p">)</span>    
+    <span class="n">mydata</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">Export</span><span class="p">()</span>
+    <span class="c"># Create minimal data exchange hdf5 file</span>
+    <span class="n">mydata</span><span class="o">.</span><span class="n">xtomo_exchange</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">,</span>
+                          <span class="n">data_white</span> <span class="o">=</span> <span class="n">white</span><span class="p">,</span>
+                          <span class="n">data_dark</span> <span class="o">=</span> <span class="n">dark</span><span class="p">,</span>
+                          <span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span><span class="p">,</span>
+                          <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="n">hdf5_file_name</span><span class="p">,</span>
+                          <span class="n">data_exchange_type</span> <span class="o">=</span> <span class="s">&#39;tomography_raw_projections&#39;</span>
+                          <span class="p">)</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Argonne National Laboratory.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

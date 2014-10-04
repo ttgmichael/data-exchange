@@ -1,0 +1,356 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataexchange.xtomo.formats.data_spe &mdash; Data Exchange 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="author" title="About these documents" href="../../../../about.html" />
+    <link rel="top" title="Data Exchange 0.2 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for dataexchange.xtomo.formats.data_spe</h1><div class="highlight"><pre>
+<span class="c">#</span>
+<span class="c"># files.py (c) Stuart B. Wilkins 2010</span>
+<span class="c">#</span>
+<span class="c"># $Id$</span>
+<span class="c"># $HeadURL$</span>
+<span class="c">#</span>
+<span class="c">#    This program is free software: you can redistribute it and/or modify</span>
+<span class="c">#    it under the terms of the GNU General Public License as published by</span>
+<span class="c">#    the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">#    (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c">#    This program is distributed in the hope that it will be useful,</span>
+<span class="c">#    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#    GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c">#    You should have received a copy of the GNU General Public License</span>
+<span class="c">#    along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c">#</span>
+<span class="c"># Part of the &quot;pyspec&quot; package</span>
+<span class="c">#</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="n">__version__</span>   <span class="o">=</span> <span class="s">&quot;$Revision$&quot;</span>
+<span class="n">__author__</span>    <span class="o">=</span> <span class="s">&quot;Stuart B. Wilkins &lt;stuwilkins@mac.com&gt;&quot;</span>
+<span class="n">__date__</span>      <span class="o">=</span> <span class="s">&quot;$LastChangedDate$&quot;</span>
+<span class="n">__id__</span>        <span class="o">=</span> <span class="s">&quot;$Id$&quot;</span>
+
+<div class="viewcode-block" id="LCLSdataformat"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_spe.html#dataexchange.xtomo.formats.data_spe.LCLSdataformat">[docs]</a><span class="k">def</span> <span class="nf">LCLSdataformat</span><span class="p">(</span><span class="n">iname</span><span class="p">,</span> <span class="n">dataFormat</span> <span class="o">=</span> <span class="s">&quot;142500f&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;function to read LCLS data.  no headers in this&quot;&quot;&quot;</span>
+    <span class="k">print</span> <span class="s">&#39;current image&#39;</span><span class="p">,</span> <span class="n">iname</span>
+    <span class="n">FH</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">iname</span><span class="p">,</span> <span class="s">&quot;rb&quot;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">dataFormat</span><span class="p">,</span> <span class="n">FH</span><span class="o">.</span><span class="n">read</span><span class="p">()))</span>
+    <span class="n">FH</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">data</span>
+
+
+    </div>
+<div class="viewcode-block" id="PrincetonSPEFile"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_spe.html#dataexchange.xtomo.formats.data_spe.PrincetonSPEFile">[docs]</a><span class="k">class</span> <span class="nc">PrincetonSPEFile</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Class to read SPE files from Princeton CCD cameras&quot;&quot;&quot;</span>
+
+    <span class="n">TEXTCOMMENTMAX</span> <span class="o">=</span> <span class="mi">80</span>
+    <span class="n">DATASTART</span> <span class="o">=</span> <span class="mi">4100</span>
+    <span class="n">NCOMMENTS</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">DATEMAX</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">TIMEMAX</span> <span class="o">=</span> <span class="mi">7</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">fid</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize class.</span>
+<span class="sd">        Parameters:</span>
+<span class="sd">           fname = Filename of SPE file</span>
+<span class="sd">           fid = File ID of open stream</span>
+
+<span class="sd">        This function initializes the class and, if either a filename or fid is</span>
+<span class="sd">        provided opens the datafile and reads the contents&quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fid</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fname</span> <span class="o">=</span> <span class="n">fname</span>
+        <span class="k">if</span> <span class="n">fname</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">openFile</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">fid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fid</span> <span class="o">=</span> <span class="n">fid</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fid</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">readData</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Provide a text representation of the file.&quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span>  <span class="s">&quot;Filename      : </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">fname</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Data size     : </span><span class="si">%d</span><span class="s"> x </span><span class="si">%d</span><span class="s"> x </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;CCD Chip Size : </span><span class="si">%d</span><span class="s"> x </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chipSize</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;File date     : </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">time</span><span class="o">.</span><span class="n">asctime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filedate</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Exposure Time : </span><span class="si">%f</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">Exposure</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Num ROI       : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">NumROI</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Num ROI Exp   : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">NumROIExperiment</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Contoller Ver.: </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ControllerVersion</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Logic Output  : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">LogicOutput</span>
+        <span class="c">#self.AppHiCapLowNoise = self._readInt(4)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Timing Mode   : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">TimingMode</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Det. Temp     : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">DetTemperature</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Det. Type     : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">DetectorType</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Trigger Diode : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">TriggerDiode</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Delay Time    : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">DelayTime</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Shutter Cont. : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ShutterControl</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Absorb Live   : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">AbsorbLive</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Absorb Mode   : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">AbsorbMode</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Virtual Chip  : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">CanDoVirtualChip</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Thresh. Min L : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ThresholdMinLive</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Thresh. Min   : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ThresholdMin</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Thresh. Max L : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ThresholdMaxLive</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Thresh. Max   : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ThresholdMax</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;Geometric Op  : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">GeometricOps</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;ADC Offset    : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ADCOffset</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;ADC Rate      : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ADCRate</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;ADC Type      : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ADCType</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;ADC Resol.    : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ADCRes</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;ADC Bit. Adj. : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">ADCBitAdj</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;ADC Gain      : </span><span class="si">%d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">Gain</span>
+        
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">roi</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allROI</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;ROI </span><span class="si">%-4d</span><span class="s">      : </span><span class="si">%-5d</span><span class="s"> </span><span class="si">%-5d</span><span class="s"> </span><span class="si">%-5d</span><span class="s"> </span><span class="si">%-5d</span><span class="s"> </span><span class="si">%-5d</span><span class="s"> </span><span class="si">%-5d</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">roi</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">roi</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">roi</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                                                                  <span class="n">roi</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">roi</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">roi</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Comments :</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_comments</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="si">%-3d</span><span class="s"> : &quot;</span> <span class="o">%</span> <span class="n">i</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="n">c</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the array with zdimension n</span>
+
+<span class="sd">        This method can be used to quickly obtain a 2-D array of the data&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_array</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+
+<div class="viewcode-block" id="PrincetonSPEFile.getData"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_spe.html#dataexchange.xtomo.formats.data_spe.PrincetonSPEFile.getData">[docs]</a>    <span class="k">def</span> <span class="nf">getData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the array of data&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_array</span>
+</div>
+<div class="viewcode-block" id="PrincetonSPEFile.getBinnedData"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_spe.html#dataexchange.xtomo.formats.data_spe.PrincetonSPEFile.getBinnedData">[docs]</a>    <span class="k">def</span> <span class="nf">getBinnedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the binned (sum of all frames) data&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_array</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PrincetonSPEFile.readData"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_spe.html#dataexchange.xtomo.formats.data_spe.PrincetonSPEFile.readData">[docs]</a>    <span class="k">def</span> <span class="nf">readData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read all the data into the class&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_readHeader</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_readSize</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_readComments</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_readAllROI</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_readDate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_readArray</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="PrincetonSPEFile.openFile"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_spe.html#dataexchange.xtomo.formats.data_spe.PrincetonSPEFile.openFile">[docs]</a>    <span class="k">def</span> <span class="nf">openFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Open a SPE file&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fname</span> <span class="o">=</span> <span class="n">fname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s">&quot;rb&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PrincetonSPEFile.getSize"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_spe.html#dataexchange.xtomo.formats.data_spe.PrincetonSPEFile.getSize">[docs]</a>    <span class="k">def</span> <span class="nf">getSize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a tuple of the size of the data array&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span></div>
+<div class="viewcode-block" id="PrincetonSPEFile.getChipSize"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_spe.html#dataexchange.xtomo.formats.data_spe.PrincetonSPEFile.getChipSize">[docs]</a>    <span class="k">def</span> <span class="nf">getChipSize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a tuple of the size of the CCD chip&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chipSize</span></div>
+<div class="viewcode-block" id="PrincetonSPEFile.getVirtualChipSize"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_spe.html#dataexchange.xtomo.formats.data_spe.PrincetonSPEFile.getVirtualChipSize">[docs]</a>    <span class="k">def</span> <span class="nf">getVirtualChipSize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the virtual chip size&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vChipSize</span>
+</div>
+<div class="viewcode-block" id="PrincetonSPEFile.getComment"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_spe.html#dataexchange.xtomo.formats.data_spe.PrincetonSPEFile.getComment">[docs]</a>    <span class="k">def</span> <span class="nf">getComment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the comments in the data file</span>
+
+<span class="sd">        If n is not provided then all the comments are returned as a list of</span>
+<span class="sd">        string values. If n is provided then the n&#39;th comment is returned&quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="n">n</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_comments</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_comments</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+</div>
+    <span class="k">def</span> <span class="nf">_readAtNumpy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">ntype</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fid</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fid</span><span class="p">,</span> <span class="n">ntype</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_readAtString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fid</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_readInt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readAtNumpy</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">int16</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="k">def</span> <span class="nf">_readFloat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readAtNumpy</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_readHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This routine contains all other information&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ControllerVersion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LogicOutput</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">AppHiCapLowNoise</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TimingMode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Exposure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readFloat</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DetTemperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readFloat</span><span class="p">(</span><span class="mi">36</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DetectorType</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">40</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TriggerDiode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">44</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DelayTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readFloat</span><span class="p">(</span><span class="mi">46</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ShutterControl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">AbsorbLive</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">52</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">AbsorbMode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">54</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">CanDoVirtualChip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">56</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ThresholdMinLive</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">58</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ThresholdMin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readFloat</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ThresholdMaxLive</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ThresholdMax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readFloat</span><span class="p">(</span><span class="mi">66</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ADCOffset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">188</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ADCRate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">190</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ADCType</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">192</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ADCRes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">194</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ADCBitAdj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">196</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Gain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">198</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GeometricOps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readInt</span><span class="p">(</span><span class="mi">600</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_readAllROI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allROI</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readAtNumpy</span><span class="p">(</span><span class="mi">1512</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumROI</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readAtNumpy</span><span class="p">(</span><span class="mi">1510</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">int16</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">NumROIExperiment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readAtNumpy</span><span class="p">(</span><span class="mi">1488</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">int16</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">NumROI</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">NumROI</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">NumROIExperiment</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">NumROIExperiment</span> <span class="o">=</span> <span class="mi">1</span>
+    
+    <span class="k">def</span> <span class="nf">_readDate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">_date</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readAtString</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DATEMAX</span><span class="p">)</span>
+        <span class="n">_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readAtString</span><span class="p">(</span><span class="mi">172</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">TIMEMAX</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filedate</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">_date</span> <span class="o">+</span> <span class="n">_time</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%d</span><span class="s">%b%Y%H%M%S&quot;</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">_readSize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">xdim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readAtNumpy</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">int16</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ydim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readAtNumpy</span><span class="p">(</span><span class="mi">656</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">int16</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">zdim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readAtNumpy</span><span class="p">(</span><span class="mi">1446</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">uint32</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">dxdim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readAtNumpy</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">int16</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">dydim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readAtNumpy</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">int16</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">vxdim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readAtNumpy</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">int16</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">vydim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_readAtNumpy</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">int16</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">int16</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_readAtNumpy</span><span class="p">(</span><span class="mi">108</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">int16</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">data_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">int16</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">dt</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">dt</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Unknown data type&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dataType</span> <span class="o">=</span> <span class="n">data_types</span><span class="p">[</span><span class="n">dt</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_size</span> <span class="o">=</span> <span class="p">(</span><span class="n">zdim</span><span class="p">,</span> <span class="n">ydim</span><span class="p">,</span> <span class="n">xdim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chipSize</span> <span class="o">=</span> <span class="p">(</span><span class="n">dydim</span><span class="p">,</span> <span class="n">dxdim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vChipSize</span> <span class="o">=</span> <span class="p">(</span><span class="n">vydim</span><span class="p">,</span> <span class="n">vxdim</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">_readComments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_comments</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_comments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_readAtString</span><span class="p">(</span><span class="mi">200</span> <span class="o">+</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEXTCOMMENTMAX</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEXTCOMMENTMAX</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_readArray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fid</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DATASTART</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fid</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataType</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_array</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">)</span>
+
+
+<span class="c">##if __name__ == &quot;__main__&quot;:</span>
+<span class="c">##    # Run a test</span>
+<span class="c">##    data = PrincetonSPEFile(&quot;../../tests/testimage.spe&quot;)</span>
+<span class="c">##    print data</span>
+    
+    </div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Argonne National Laboratory.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

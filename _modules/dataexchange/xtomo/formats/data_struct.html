@@ -1,0 +1,354 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataexchange.xtomo.formats.data_struct &mdash; Data Exchange 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="author" title="About these documents" href="../../../../about.html" />
+    <link rel="top" title="Data Exchange 0.2 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for dataexchange.xtomo.formats.data_struct</h1><div class="highlight"><pre>
+<span class="c"># </span>
+<span class="c">#   This file is part of Mantis, a Multivariate ANalysis Tool for Spectromicroscopy.</span>
+<span class="c"># </span>
+<span class="c">#   Copyright (C) 2011 Mirna Lerotic, 2nd Look</span>
+<span class="c">#   http://2ndlook.co/products.html</span>
+<span class="c">#   License: GNU GPL v3</span>
+<span class="c">#</span>
+<span class="c">#   Mantis is free software: you can redistribute it and/or modify</span>
+<span class="c">#   it under the terms of the GNU General Public License as published by</span>
+<span class="c">#   the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">#   any later version.</span>
+<span class="c">#</span>
+<span class="c">#   Mantis is distributed in the hope that it will be useful,</span>
+<span class="c">#   but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#   GNU General Public License for more details &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+
+<span class="c">#    This module is used to pass data between routines and is based on </span>
+<span class="c">#    https://confluence.aps.anl.gov/display/NX/Data+Exchange+Basics</span>
+
+
+<div class="viewcode-block" id="Descr"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.Descr">[docs]</a><span class="k">class</span> <span class="nc">Descr</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">owner</span><span class="p">):</span>
+        <span class="c"># Check if the value has been set</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;_value&quot;</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="c">#print &quot;Getting value: %s&quot; % self._value</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span>
+
+    <span class="k">def</span> <span class="nf">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="c">#print &quot;Setting to %s&quot; % value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">__delete__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">)</span>
+
+
+<span class="c">### Information HDF5 Group</span>
+<span class="c">#----------------------------------------------------------------------</span></div>
+<div class="viewcode-block" id="ids"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.ids">[docs]</a><span class="k">class</span> <span class="nc">ids</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">proposal</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>   
+    <span class="n">activity</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">esaf</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span> 
+
+
+<span class="c">#----------------------------------------------------------------------</span></div>
+<div class="viewcode-block" id="experimenter"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.experimenter">[docs]</a><span class="k">class</span> <span class="nc">experimenter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>   
+    <span class="n">role</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">affiliation</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span> 
+    <span class="n">address</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>  
+    <span class="n">phone</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">facility_user_id</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span> 
+    
+
+<span class="c">#----------------------------------------------------------------------</span></div>
+<div class="viewcode-block" id="sample"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.sample">[docs]</a><span class="k">class</span> <span class="nc">sample</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    
+    <span class="n">name</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">description</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+<span class="c">#   preparation_date [string - ISO 8601 format]        </span>
+    <span class="n">preparation_datetime</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+<span class="c">#   chemical_formula [string - abbreviated CIF format]</span>
+    <span class="n">chemical_formula</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>    
+    <span class="n">environment</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">temperature</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">temperature_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">pressure</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">pressure_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+        
+        
+<span class="c">#----------------------------------------------------------------------</span></div>
+<div class="viewcode-block" id="objective"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.objective">[docs]</a><span class="k">class</span> <span class="nc">objective</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">manufacturer</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>   
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">comment</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span> 
+    <span class="n">magnification</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    
+
+<span class="c">#----------------------------------------------------------------------</span></div>
+<div class="viewcode-block" id="scintillator"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.scintillator">[docs]</a><span class="k">class</span> <span class="nc">scintillator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>   
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">comment</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span> 
+    <span class="n">scintillating_thickness</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>   
+    <span class="n">scintillating_thickness_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">substrate_thickness</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">substrate_thickness_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    
+    
+<span class="c">#----------------------------------------------------------------------</span></div>
+<div class="viewcode-block" id="facility"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.facility">[docs]</a><span class="k">class</span> <span class="nc">facility</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>   
+    <span class="n">beamline</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    
+    
+<span class="c">#----------------------------------------------------------------------</span></div>
+<div class="viewcode-block" id="accelerator"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.accelerator">[docs]</a><span class="k">class</span> <span class="nc">accelerator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+        
+    <span class="n">ring_current</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span> 
+    <span class="n">ring_current_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">primary_beam_energy</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>   
+    <span class="n">primary_beam_energy_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">monostripe</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    
+    
+<span class="c">#----------------------------------------------------------------------</span></div>
+<div class="viewcode-block" id="pixel_size"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.pixel_size">[docs]</a><span class="k">class</span> <span class="nc">pixel_size</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+           
+    <span class="n">horizontal</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>     
+    <span class="n">horizontal_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>      
+    <span class="n">vertical</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>    
+    <span class="n">vertical_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>      
+           
+<span class="c">#----------------------------------------------------------------------</span></div>
+<div class="viewcode-block" id="dimensions"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.dimensions">[docs]</a><span class="k">class</span> <span class="nc">dimensions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+           
+    <span class="n">horizontal</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">vertical</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+           
+<span class="c">#----------------------------------------------------------------------</span></div>
+<div class="viewcode-block" id="binning"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.binning">[docs]</a><span class="k">class</span> <span class="nc">binning</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+           
+    <span class="n">horizontal</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">vertical</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+           
+<span class="c">#----------------------------------------------------------------------</span></div>
+<div class="viewcode-block" id="axis_directions"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.axis_directions">[docs]</a><span class="k">class</span> <span class="nc">axis_directions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+           
+    <span class="n">horizontal</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>     
+    <span class="n">vertical</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>    
+     
+<span class="c">#----------------------------------------------------------------------</span></div>
+<div class="viewcode-block" id="roi"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.roi">[docs]</a><span class="k">class</span> <span class="nc">roi</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+           
+    <span class="n">x1</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">y1</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">x2</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">y2</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span> 
+    
+    
+<span class="c">#----------------------------------------------------------------------</span></div>
+<div class="viewcode-block" id="detector"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.detector">[docs]</a><span class="k">class</span> <span class="nc">detector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>  
+    
+    <span class="n">manufacturer</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>     
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>    
+    <span class="n">serial_number</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>      
+    <span class="n">bit_depth</span>  <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>    
+    <span class="n">operating_temperature</span>  <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>      
+    <span class="n">operating_temperature_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>     
+    <span class="n">exposure_time</span>  <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>     
+    <span class="n">exposure_time_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>    
+    <span class="n">frame_rate</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    
+    <span class="n">pixel_size</span> <span class="o">=</span> <span class="n">pixel_size</span><span class="p">()</span>
+    <span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span><span class="p">()</span>
+    <span class="n">binning</span> <span class="o">=</span> <span class="n">binning</span><span class="p">()</span>
+    <span class="n">axis_directions</span> <span class="o">=</span> <span class="n">axis_directions</span><span class="p">()</span>
+    <span class="n">roi</span> <span class="o">=</span> <span class="n">roi</span><span class="p">()</span>
+
+        
+<span class="c">#----------------------------------------------------------------------        </span></div>
+<div class="viewcode-block" id="information"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.information">[docs]</a><span class="k">class</span> <span class="nc">information</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">title</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">comment</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">file_creation_datetime</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    
+    <span class="n">ids</span> <span class="o">=</span> <span class="n">ids</span><span class="p">()</span>
+    <span class="n">experimenter</span> <span class="o">=</span> <span class="n">experimenter</span><span class="p">()</span> 
+    <span class="n">sample</span> <span class="o">=</span> <span class="n">sample</span><span class="p">()</span>
+    <span class="n">objective</span> <span class="o">=</span> <span class="n">objective</span><span class="p">()</span>
+    <span class="n">scintillator</span> <span class="o">=</span> <span class="n">scintillator</span><span class="p">()</span>
+    <span class="n">facility</span> <span class="o">=</span> <span class="n">facility</span><span class="p">()</span>
+    <span class="n">accelerator</span> <span class="o">=</span> <span class="n">accelerator</span><span class="p">()</span>
+    <span class="n">detector</span> <span class="o">=</span> <span class="n">detector</span><span class="p">()</span>
+    
+         
+
+<span class="c">#Exchange HDF5 group  </span>
+ <span class="c">#----------------------------------------------------------------------</span></div>
+<div class="viewcode-block" id="exchange"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.exchange">[docs]</a><span class="k">class</span> <span class="nc">exchange</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">title</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">comment</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">data_collection_datetime</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    
+    <span class="c">#n-dimensional dataset </span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    
+    <span class="n">data_signal</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">data_description</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">data_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">data_axes</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">data_detector</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    
+    <span class="c">#These are described in data attribute axes &#39;x:y:z&#39; but can be arbitrary </span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">x_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">y_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">z_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    
+    <span class="n">energy</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>  
+    <span class="n">energy_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    
+    <span class="n">white_data</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">white_data_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">dark_data</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">dark_data_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">rotation</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    
+    <span class="n">angles</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+
+<span class="c"># Spectromicroscopy HDF5 Group        </span>
+<span class="c">#----------------------------------------------------------------------</span></div>
+<div class="viewcode-block" id="normalization"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.normalization">[docs]</a><span class="k">class</span> <span class="nc">normalization</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">white_spectrum</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">white_spectrum_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">white_spectrum_energy</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">white_spectrum_energy_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+               
+               
+<span class="c">#----------------------------------------------------------------------</span></div>
+<div class="viewcode-block" id="spectromicroscopy"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.spectromicroscopy">[docs]</a><span class="k">class</span> <span class="nc">spectromicroscopy</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">positions_units</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">positions_names</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+        
+    <span class="n">normalization</span> <span class="o">=</span> <span class="n">normalization</span><span class="p">()</span>
+        
+    <span class="n">optical_density</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    
+    <span class="n">data_dwell</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">i0_dwell</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+        
+
+<span class="c"># HDF5 Root Group</span>
+<span class="c">#----------------------------------------------------------------------</span></div>
+<div class="viewcode-block" id="h5"><a class="viewcode-back" href="../../../../resources/dataexchange.xtomo.formats.data_struct.html#dataexchange.xtomo.formats.data_struct.h5">[docs]</a><span class="k">class</span> <span class="nc">h5</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    
+    <span class="c">#implements [string] comma separated string that tells the user which entries file contains</span>
+    <span class="n">implements</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span>
+    <span class="n">version</span> <span class="o">=</span> <span class="n">Descr</span><span class="p">()</span> 
+
+    <span class="n">information</span> <span class="o">=</span> <span class="n">information</span><span class="p">()</span>
+    <span class="n">exchange</span> <span class="o">=</span> <span class="n">exchange</span><span class="p">()</span>
+    <span class="n">spectromicroscopy</span> <span class="o">=</span> <span class="n">spectromicroscopy</span><span class="p">()</span>
+        </div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">Data Exchange 0.2 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Argonne National Laboratory.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

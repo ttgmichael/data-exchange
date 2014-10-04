@@ -77,28 +77,24 @@ DPT, netCDF.</p>
 <p>Examples</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">dataexchange.xtomo.xtomo_importer</span> <span class="kn">as</span> <span class="nn">dx</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">dataexchange.xtomo.xtomo_exporter</span> <span class="kn">as</span> <span class="nn">ex</span>
-</pre></div>
-</div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/data/radios/image_.tif&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/data/radios/image_.tif&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/data/darks/image_.tif&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/data/flats/image_.tif&#39;</span>
-</pre></div>
-</div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/data/dataExchange/Anka.h5&#39;</span>
-</pre></div>
-</div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">projections_start</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/data/dataExchange/Anka.h5&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">projections_start</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">projections_end</span> <span class="o">=</span> <span class="mi">3167</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">white_start</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">white_end</span> <span class="o">=</span> <span class="mi">100</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dark_start</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dark_end</span> <span class="o">=</span> <span class="mi">100</span>
-</pre></div>
-</div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sample_name</span> <span class="o">=</span> <span class="s">&#39;Anka&#39;</span>
-</pre></div>
-</div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mydata</span> <span class="o">=</span> <span class="n">dx</span><span class="o">.</span><span class="n">Import</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sample_name</span> <span class="o">=</span> <span class="s">&#39;Anka&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>    
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mydata</span> <span class="o">=</span> <span class="n">dx</span><span class="o">.</span><span class="n">Import</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c"># Read series of images</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="p">,</span> <span class="n">white</span><span class="p">,</span> <span class="n">dark</span><span class="p">,</span> <span class="n">theta</span> <span class="o">=</span> <span class="n">mydata</span><span class="o">.</span><span class="n">xtomo_raw</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span>
 <span class="gp">&gt;&gt;&gt; </span>                                                   <span class="n">projections_start</span> <span class="o">=</span> <span class="n">projections_start</span><span class="p">,</span>
@@ -121,6 +117,7 @@ DPT, netCDF.</p>
 <dt id="dataexchange.xtomo.xtomo_importer.Import.xtomo_raw">
 <tt class="descname">xtomo_raw</tt><big>(</big><em>file_name</em>, <em>projections_start=0</em>, <em>projections_end=0</em>, <em>projections_step=1</em>, <em>slices_start=0</em>, <em>slices_end=0</em>, <em>slices_step=1</em>, <em>pixels_start=0</em>, <em>pixels_end=0</em>, <em>pixels_step=1</em>, <em>white_file_name=None</em>, <em>white_start=0</em>, <em>white_end=0</em>, <em>white_step=1</em>, <em>dark_file_name=None</em>, <em>dark_start=0</em>, <em>dark_end=0</em>, <em>dark_step=1</em>, <em>projections_angle_start=0</em>, <em>projections_angle_end=180</em>, <em>projections_zeros=True</em>, <em>projections_digits=-1</em>, <em>white_digits=None</em>, <em>dark_digits=None</em>, <em>white_zeros=True</em>, <em>dark_zeros=True</em>, <em>dtype='uint16'</em>, <em>data_type='tiff'</em>, <em>exchange_rank=0</em>, <em>log='INFO'</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_importer.html#Import.xtomo_raw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_importer.Import.xtomo_raw" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read a stack of 2-D HDF4, TIFF, spe or netCDF images.</p>
+<p>Parameters</p>
 <dl class="docutils">
 <dt>file_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
 <dd>Base name of the input HDF4 or TIFF files.
@@ -186,6 +183,7 @@ if rank is not set then the data are raw from the detector and are located under
 exchange = &#8220;exchange/...&#8221;, to process data that are the result of some intemedite 
 processing step then exchange_rank = 1 will direct tomopy to process &#8220;exchange1/...&#8221;</dd>
 </dl>
+<p>Returns</p>
 <p>Output : data, data_white, data_dark, theta</p>
 </dd></dl>
 
