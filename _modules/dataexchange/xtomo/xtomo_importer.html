@@ -220,7 +220,8 @@
 <span class="sd">            supported options are:</span>
 <span class="sd">                - ``compressed_tiff``: tiff files used at elettra</span>
 <span class="sd">                - ``dpt``: ASCII data from SRC infrared tomography</span>
-<span class="sd">                - ``edf``: ESRF file format</span>
+<span class="sd">                - ``edf``: ESRF file format when projections, dark and white are in a single (large) edf files</span>
+<span class="sd">                - ``edf2``: ESRF file format when projections, dark and white are each in a single file (series of files)s</span>
 <span class="sd">                - ``nc``: netCDF data from 13-BM</span>
 <span class="sd">                - ``nxs``: NeXuS Diamond Light Source</span>
 <span class="sd">                - ``hdf4``: HDF4 files used on old detectors at APS 2-BM</span>
@@ -353,6 +354,18 @@
                 <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;edf&#39;</span><span class="p">):</span>
                 <span class="n">data_file_dark</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
+        <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;edf2&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;EDF&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;edf&#39;</span><span class="p">):</span>
+                <span class="n">data_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">dataExtension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;EDF&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">white_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;edf&#39;</span><span class="p">):</span>
+                <span class="n">data_file_white</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">white_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;EDF&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">dark_file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;edf&#39;</span><span class="p">):</span>
+                <span class="n">data_file_dark</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">dark_file_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
         <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;dpt&#39;</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;DPT&#39;</span><span class="p">)</span> <span class="ow">or</span> \
                 <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;dpt&#39;</span><span class="p">):</span>
@@ -471,9 +484,15 @@
                                      <span class="n">x_step</span><span class="o">=</span><span class="n">slices_step</span><span class="p">,</span>
                                      <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;edf2&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">edf2</span><span class="p">(</span><span class="n">x_start</span><span class="o">=</span><span class="n">slices_start</span><span class="p">,</span>
+                                     <span class="n">x_end</span><span class="o">=</span><span class="n">slices_end</span><span class="p">,</span>
+                                     <span class="n">x_step</span><span class="o">=</span><span class="n">slices_step</span><span class="p">)</span>
+
                 <span class="k">if</span> <span class="p">((</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;tiff&#39;</span><span class="p">)</span> <span class="ow">or</span>
                     <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;compressed_tiff&#39;</span><span class="p">)</span> <span class="ow">or</span>
                     <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf4&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;edf2&#39;</span><span class="p">)</span> <span class="ow">or</span>
                     <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf5&#39;</span><span class="p">)):</span>
                     <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># Get resolution once.</span>
                         <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span> <span class="n">tmpdata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tmpdata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
@@ -611,9 +630,15 @@
                                      <span class="n">x_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">,</span>
                                      <span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span><span class="p">)</span>
 
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;edf2&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">edf2</span><span class="p">(</span><span class="n">x_start</span> <span class="o">=</span> <span class="n">slices_start</span><span class="p">,</span>
+                                     <span class="n">x_end</span> <span class="o">=</span> <span class="n">slices_end</span><span class="p">,</span>
+                                     <span class="n">x_step</span> <span class="o">=</span> <span class="n">slices_step</span><span class="p">)</span>
+
                 <span class="k">if</span> <span class="p">((</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;tiff&#39;</span><span class="p">)</span> <span class="ow">or</span>
                     <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;compressed_tiff&#39;</span><span class="p">)</span> <span class="ow">or</span>
                     <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf4&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;edf2&#39;</span><span class="p">)</span> <span class="ow">or</span>
                     <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf5&#39;</span><span class="p">)):</span>
                     <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># Get resolution once.</span>
                         <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
@@ -772,9 +797,15 @@
                                      <span class="n">x_step</span><span class="o">=</span><span class="n">slices_step</span><span class="p">,</span>
                                      <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
+                <span class="k">elif</span> <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;edf2&#39;</span><span class="p">):</span>
+                    <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">edf2</span><span class="p">(</span><span class="n">x_start</span><span class="o">=</span><span class="n">slices_start</span><span class="p">,</span>
+                                     <span class="n">x_end</span><span class="o">=</span><span class="n">slices_end</span><span class="p">,</span>
+                                     <span class="n">x_step</span><span class="o">=</span><span class="n">slices_step</span><span class="p">)</span>
+
                 <span class="k">if</span> <span class="p">((</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;tiff&#39;</span><span class="p">)</span> <span class="ow">or</span>
                     <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;compressed_tiff&#39;</span><span class="p">)</span> <span class="ow">or</span>
                     <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf4&#39;</span><span class="p">)</span> <span class="ow">or</span> 
+                    <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;edf2&#39;</span><span class="p">)</span> <span class="ow">or</span>
                     <span class="p">(</span><span class="n">data_type</span> <span class="ow">is</span> <span class="s">&#39;hdf5&#39;</span><span class="p">)):</span>
                     <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># Get resolution once.</span>
                         <span class="n">input_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>

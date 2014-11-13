@@ -720,6 +720,52 @@
                           <span class="n">x_start</span><span class="p">:</span><span class="n">x_end</span><span class="p">:</span><span class="n">x_step</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">dataset</span>
         </div>
+<div class="viewcode-block" id="XTomoReader.edf2"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_reader.html#dataexchange.xtomo.xtomo_reader.XTomoReader.edf2">[docs]</a>    <span class="k">def</span> <span class="nf">edf2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">x_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">x_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">x_step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">y_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">y_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">y_step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Read 2-D tomographic projection data from an EDF (ESRF) file.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        file_name : str</span>
+<span class="sd">            Input edf file.</span>
+<span class="sd">            </span>
+<span class="sd">        x_start, x_end, x_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">        </span>
+<span class="sd">        y_start, y_end, y_step : scalar, optional</span>
+<span class="sd">            Values of the start, end and step of the</span>
+<span class="sd">            slicing for the whole array.</span>
+<span class="sd">                </span>
+<span class="sd">        Returns</span>
+<span class="sd">        </span>
+<span class="sd">        out : array</span>
+<span class="sd">            Output 2-D matrix as numpy array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+ 
+        <span class="c"># Read data from file.</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">EdfFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="n">access</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">dic</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">GetStaticHeader</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">tmpdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">dic</span><span class="p">[</span><span class="s">&#39;Dim_2&#39;</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">dic</span><span class="p">[</span><span class="s">&#39;Dim_1&#39;</span><span class="p">])))</span>
+        
+        <span class="n">tmpdata</span><span class="p">[::]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">GetData</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">num_y</span><span class="p">,</span> <span class="n">num_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">tmpdata</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">x_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">x_end</span> <span class="o">=</span> <span class="n">num_x</span>
+        <span class="k">if</span> <span class="n">y_end</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">y_end</span> <span class="o">=</span> <span class="n">num_y</span>
+
+        <span class="k">return</span> <span class="n">tmpdata</span><span class="p">[</span><span class="n">y_start</span><span class="p">:</span><span class="n">y_end</span><span class="p">:</span><span class="n">y_step</span><span class="p">,</span>
+                   <span class="n">x_start</span><span class="p">:</span><span class="n">x_end</span><span class="p">:</span><span class="n">x_step</span><span class="p">]</span>
+</div>
 <div class="viewcode-block" id="XTomoReader.dpt"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_reader.html#dataexchange.xtomo.xtomo_reader.XTomoReader.dpt">[docs]</a>    <span class="k">def</span> <span class="nf">dpt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
              <span class="n">x_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
              <span class="n">x_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>

@@ -153,6 +153,28 @@ slicing for the whole array.</dd>
 </dd></dl>
 
 <dl class="method">
+<dt id="dataexchange.xtomo.xtomo_reader.XTomoReader.edf2">
+<tt class="descname">edf2</tt><big>(</big><em>x_start=0</em>, <em>x_end=0</em>, <em>x_step=1</em>, <em>y_start=0</em>, <em>y_end=0</em>, <em>y_step=1</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_reader.html#XTomoReader.edf2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_reader.XTomoReader.edf2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read 2-D tomographic projection data from an EDF (ESRF) file.</p>
+<p>Parameters</p>
+<dl class="docutils">
+<dt>file_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Input edf file.</dd>
+<dt>x_start, x_end, x_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+<dt>y_start, y_end, y_step <span class="classifier-delimiter">:</span> <span class="classifier">scalar, optional</span></dt>
+<dd>Values of the start, end and step of the
+slicing for the whole array.</dd>
+</dl>
+<p>Returns</p>
+<dl class="docutils">
+<dt>out <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>Output 2-D matrix as numpy array.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="dataexchange.xtomo.xtomo_reader.XTomoReader.hdf4">
 <tt class="descname">hdf4</tt><big>(</big><em>array_name=None</em>, <em>x_start=0</em>, <em>x_end=0</em>, <em>x_step=1</em>, <em>y_start=0</em>, <em>y_end=0</em>, <em>y_step=1</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_reader.html#XTomoReader.hdf4"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_reader.XTomoReader.hdf4" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read 2-D tomographic projection data from an HDF4 file.</p>
