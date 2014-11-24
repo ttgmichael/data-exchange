@@ -61,7 +61,7 @@
 <span class="sd">:Organization:</span>
 <span class="sd">  Argonne National Laboratory, Argonne, IL 60439 USA</span>
 
-<span class="sd">:Version: 2014.08.15</span>
+<span class="sd">:Version: 2014.11.23</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -294,6 +294,11 @@
                 <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
                 <span class="s">&#39;units&#39;</span><span class="p">:</span> <span class="s">&#39;text&#39;</span><span class="p">,</span>
                 <span class="s">&#39;docstring&#39;</span><span class="p">:</span> <span class="s">&#39;Sample position in the sample changer/robot.&#39;</span>
+            <span class="p">},</span>
+            <span class="s">&#39;comment&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                <span class="s">&#39;units&#39;</span><span class="p">:</span> <span class="s">&#39;text&#39;</span><span class="p">,</span>
+                <span class="s">&#39;docstring&#39;</span><span class="p">:</span> <span class="s">&#39;comment&#39;</span>
             <span class="p">}</span>
         <span class="p">}</span>
 
@@ -385,6 +390,11 @@
                 <span class="s">&#39;units&#39;</span><span class="p">:</span> <span class="s">&#39;text&#39;</span><span class="p">,</span>
                 <span class="s">&#39;docstring&#39;</span><span class="p">:</span> <span class="s">&#39;Name of the instrument.&#39;</span>
             <span class="p">},</span>
+            <span class="s">&#39;comment&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                <span class="s">&#39;units&#39;</span><span class="p">:</span> <span class="s">&#39;text&#39;</span><span class="p">,</span>
+                <span class="s">&#39;docstring&#39;</span><span class="p">:</span> <span class="s">&#39;comment&#39;</span>
+            <span class="p">},</span>
         <span class="p">}</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_source</span> <span class="o">=</span> <span class="p">{</span>
@@ -426,10 +436,10 @@
                 <span class="s">&#39;units&#39;</span><span class="p">:</span> <span class="s">&#39;s&#39;</span><span class="p">,</span>
                 <span class="s">&#39;docstring&#39;</span><span class="p">:</span> <span class="s">&#39;Duration of the pulse (s).&#39;</span>
             <span class="p">},</span>
-            <span class="s">&#39;source&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;mode&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
                 <span class="s">&#39;units&#39;</span><span class="p">:</span> <span class="s">&#39;text&#39;</span><span class="p">,</span>
-                <span class="s">&#39;docstring&#39;</span><span class="p">:</span> <span class="s">&#39;Beam mode: TOPUP&#39;</span>
+                <span class="s">&#39;docstring&#39;</span><span class="p">:</span> <span class="s">&#39;top-up&#39;</span>
             <span class="p">},</span>
             <span class="s">&#39;beam intensity incident&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
@@ -881,6 +891,16 @@
                 <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
                 <span class="s">&#39;units&#39;</span><span class="p">:</span> <span class="s">&#39;degree&#39;</span><span class="p">,</span>
                 <span class="s">&#39;docstring&#39;</span><span class="p">:</span> <span class="s">&#39;Rotation axis angular step used during data collection.&#39;</span>
+            <span class="p">},</span>
+            <span class="s">&#39;mode&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                <span class="s">&#39;units&#39;</span><span class="p">:</span> <span class="s">&#39;text&#39;</span><span class="p">,</span>
+                <span class="s">&#39;docstring&#39;</span><span class="p">:</span> <span class="s">&#39;Scan mode: continuos or stop-go.&#39;</span>
+            <span class="p">},</span>
+            <span class="s">&#39;comment&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                <span class="s">&#39;units&#39;</span><span class="p">:</span> <span class="s">&#39;text&#39;</span><span class="p">,</span>
+                <span class="s">&#39;docstring&#39;</span><span class="p">:</span> <span class="s">&#39;comment&#39;</span>
             <span class="p">},</span>
         <span class="p">}</span>
 

@@ -74,10 +74,10 @@
 </table>
 <dl class="class">
 <dt id="dataexchange.xtomo.xtomo_exporter.Export">
-<em class="property">class </em><tt class="descclassname">dataexchange.xtomo.xtomo_exporter.</tt><tt class="descname">Export</tt><big>(</big><em>data=None</em>, <em>data_white=None</em>, <em>data_dark=None</em>, <em>theta=None</em>, <em>hdf5_file_name=None</em>, <em>data_exchange_type=None</em>, <em>sample_name=None</em>, <em>logger=None</em>, <em>log='INFO'</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_exporter.html#Export"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_exporter.Export" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">dataexchange.xtomo.xtomo_exporter.</tt><tt class="descname">Export</tt><big>(</big><em>data=None</em>, <em>data_white=None</em>, <em>data_dark=None</em>, <em>theta=None</em>, <em>data_exchange_type=None</em>, <em>source_name=None</em>, <em>source_mode=None</em>, <em>source_datetime=None</em>, <em>beamline=None</em>, <em>energy=None</em>, <em>current=None</em>, <em>actual_pixel_size=None</em>, <em>experimenter_name=None</em>, <em>experimenter_affiliation=None</em>, <em>experimenter_email=None</em>, <em>instrument_comment=None</em>, <em>sample_name=None</em>, <em>sample_comment=None</em>, <em>acquisition_mode=None</em>, <em>acquisition_comment=None</em>, <em>hdf5_file_name=None</em>, <em>logger=None</em>, <em>log='INFO'</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_exporter.html#Export"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_exporter.Export" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="dataexchange.xtomo.xtomo_exporter.Export.xtomo_exchange">
-<tt class="descname">xtomo_exchange</tt><big>(</big><em>data</em>, <em>data_white=None</em>, <em>data_dark=None</em>, <em>theta=None</em>, <em>sample_name=None</em>, <em>data_exchange_type=None</em>, <em>hdf5_file_name=None</em>, <em>log='INFO'</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_exporter.html#Export.xtomo_exchange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_exporter.Export.xtomo_exchange" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">xtomo_exchange</tt><big>(</big><em>data</em>, <em>data_white=None</em>, <em>data_dark=None</em>, <em>theta=None</em>, <em>data_exchange_type=None</em>, <em>source_name=None</em>, <em>source_mode=None</em>, <em>source_datetime=None</em>, <em>beamline=None</em>, <em>energy=None</em>, <em>current=None</em>, <em>actual_pixel_size=None</em>, <em>experimenter_name=None</em>, <em>experimenter_affiliation=None</em>, <em>experimenter_email=None</em>, <em>instrument_comment=None</em>, <em>sample_name=None</em>, <em>sample_comment=None</em>, <em>acquisition_mode=None</em>, <em>acquisition_comment=None</em>, <em>hdf5_file_name=None</em>, <em>log='INFO'</em><big>)</big><a class="reference internal" href="../_modules/dataexchange/xtomo/xtomo_exporter.html#Export.xtomo_exchange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dataexchange.xtomo.xtomo_exporter.Export.xtomo_exchange" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write 3-D data to a data-exchange file.</p>
 <p>Parameters</p>
 <dl class="docutils">
@@ -93,9 +93,25 @@ be the same as data: [shots, slices, pixels].</dd>
 <dt>theta <span class="classifier-delimiter">:</span> <span class="classifier">ndarray, optional</span></dt>
 <dd>Data acquisition angles corresponding
 to each projection.</dd>
-<dt>data_excahnge_type <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dt>data_excahnge_type <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
 <dd>label defyining the type of data contained in data exchange file
 for raw data tomography data use &#8216;tomography_raw_projections&#8217;</dd>
+<dt>source_name, source_mode, source_datetime <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
+<dd>label defining the source name, operation mode and date/time when these values were taken</dd>
+<dt>beamline <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
+<dd>label defining the beamline name</dd>
+<dt>energy, current <span class="classifier-delimiter">:</span> <span class="classifier">float, optional</span></dt>
+<dd>X-ray energy and bean current</dd>
+<dt>actual_pixel_size <span class="classifier-delimiter">:</span> <span class="classifier">float, optional</span></dt>
+<dd>pixel size on the sample plane</dd>
+<dt>experimenter_name, experimenter_affiliation, experimenter_email <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
+<dd>user name, affiliation and e-mail address</dd>
+<dt>instrument_comment <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
+<dd>instrument comment</dd>
+<dt>sample_name, sample_comment <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
+<dd>sample name and comment</dd>
+<dt>acquisition_mode, acquisition_comment <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
+<dd>acquisition mode and comment</dd>
 <dt>hd5_file_name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
 <dd>Output file.</dd>
 </dl>

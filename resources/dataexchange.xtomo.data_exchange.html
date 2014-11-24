@@ -66,7 +66,7 @@
 </tr>
 <tr class="field-even field"><th class="field-name">Organization:</th><td class="field-body">Argonne National Laboratory, Argonne, IL 60439 USA</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Version:</th><td class="field-body">2014.08.15</td>
+<tr class="field-odd field"><th class="field-name">Version:</th><td class="field-body">2014.11.23</td>
 </tr>
 </tbody>
 </table>
@@ -84,6 +84,11 @@
 <dd></dd></dl>
 
 <dl class="attribute">
+<dt id="dataexchange.xtomo.data_exchange.DataExchangeEntry.acquisition.comment">
+<tt class="descname">comment</tt><em class="property"> = {'units': 'text', 'docstring': 'comment', 'value': None}</em><a class="headerlink" href="#dataexchange.xtomo.data_exchange.DataExchangeEntry.acquisition.comment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="dataexchange.xtomo.data_exchange.DataExchangeEntry.acquisition.docstring">
 <tt class="descname">docstring</tt><em class="property"> = 'Tomography specific tag to store scan parameters.'</em><a class="headerlink" href="#dataexchange.xtomo.data_exchange.DataExchangeEntry.acquisition.docstring" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -96,6 +101,11 @@
 <dl class="attribute">
 <dt id="dataexchange.xtomo.data_exchange.DataExchangeEntry.acquisition.entry_name">
 <tt class="descname">entry_name</tt><em class="property"> = 'acquisition'</em><a class="headerlink" href="#dataexchange.xtomo.data_exchange.DataExchangeEntry.acquisition.entry_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="dataexchange.xtomo.data_exchange.DataExchangeEntry.acquisition.mode">
+<tt class="descname">mode</tt><em class="property"> = {'units': 'text', 'docstring': 'Scan mode: continuos or stop-go.', 'value': None}</em><a class="headerlink" href="#dataexchange.xtomo.data_exchange.DataExchangeEntry.acquisition.mode" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -476,6 +486,11 @@
 <em class="property">class </em><tt class="descclassname">DataExchangeEntry.</tt><tt class="descname">instrument</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.data_exchange.DataExchangeEntry.instrument" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></a></p>
 <dl class="attribute">
+<dt id="dataexchange.xtomo.data_exchange.DataExchangeEntry.instrument.comment">
+<tt class="descname">comment</tt><em class="property"> = {'units': 'text', 'docstring': 'comment', 'value': None}</em><a class="headerlink" href="#dataexchange.xtomo.data_exchange.DataExchangeEntry.instrument.comment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="dataexchange.xtomo.data_exchange.DataExchangeEntry.instrument.docstring">
 <tt class="descname">docstring</tt><em class="property"> = 'All relevant beamline components status at the beginning of a measurement'</em><a class="headerlink" href="#dataexchange.xtomo.data_exchange.DataExchangeEntry.instrument.docstring" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -656,6 +671,11 @@
 <dt id="dataexchange.xtomo.data_exchange.DataExchangeEntry.sample">
 <em class="property">class </em><tt class="descclassname">DataExchangeEntry.</tt><tt class="descname">sample</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#dataexchange.xtomo.data_exchange.DataExchangeEntry.sample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></a></p>
+<dl class="attribute">
+<dt id="dataexchange.xtomo.data_exchange.DataExchangeEntry.sample.comment">
+<tt class="descname">comment</tt><em class="property"> = {'units': 'text', 'docstring': 'comment', 'value': None}</em><a class="headerlink" href="#dataexchange.xtomo.data_exchange.DataExchangeEntry.sample.comment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="dataexchange.xtomo.data_exchange.DataExchangeEntry.sample.concentration">
 <tt class="descname">concentration</tt><em class="property"> = {'units': 'kgm^-3', 'docstring': 'Mass/volume.', 'value': None}</em><a class="headerlink" href="#dataexchange.xtomo.data_exchange.DataExchangeEntry.sample.concentration" title="Permalink to this definition">¶</a></dt>
@@ -881,6 +901,11 @@
 <dd></dd></dl>
 
 <dl class="attribute">
+<dt id="dataexchange.xtomo.data_exchange.DataExchangeEntry.source.mode">
+<tt class="descname">mode</tt><em class="property"> = {'units': 'text', 'docstring': 'top-up', 'value': None}</em><a class="headerlink" href="#dataexchange.xtomo.data_exchange.DataExchangeEntry.source.mode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="dataexchange.xtomo.data_exchange.DataExchangeEntry.source.name">
 <tt class="descname">name</tt><em class="property"> = {'units': 'text', 'docstring': 'Name of the facility.', 'value': None}</em><a class="headerlink" href="#dataexchange.xtomo.data_exchange.DataExchangeEntry.source.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -898,11 +923,6 @@
 <dl class="attribute">
 <dt id="dataexchange.xtomo.data_exchange.DataExchangeEntry.source.root">
 <tt class="descname">root</tt><em class="property"> = '/measurement/instrument'</em><a class="headerlink" href="#dataexchange.xtomo.data_exchange.DataExchangeEntry.source.root" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="dataexchange.xtomo.data_exchange.DataExchangeEntry.source.source">
-<tt class="descname">source</tt><em class="property"> = {'units': 'text', 'docstring': 'Beam mode: TOPUP', 'value': None}</em><a class="headerlink" href="#dataexchange.xtomo.data_exchange.DataExchangeEntry.source.source" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

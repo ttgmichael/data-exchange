@@ -73,28 +73,160 @@
 
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../resources/demo.convert_ESRF2_ID19.html#demo.convert_ESRF2_ID19.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
 
-    <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF2/0006_AV67_016_offsetAngleMinus12/0006_AV67_016_offsetAngleMinus12.edf&#39;</span>
-    <span class="c">#dark_file_name = &#39;/local/dataraid/databank/ESRF2/0006_AV67_016_offsetAngleMinus12/dark2_.edf&#39;</span>
-    <span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF2/0006_AV67_016_offsetAngleMinus12/ref.edf&#39;</span>
-
-    <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/tmp/ESRF2.h5&#39;</span>
-
-    <span class="n">sample_name</span> <span class="o">=</span> <span class="s">&#39;0006_AV67_016_offsetAngleMinus12&#39;</span>
+    <span class="n">source_name</span> <span class="o">=</span> <span class="s">&quot;ESRF&quot;</span>
+    <span class="n">beamline</span> <span class="o">=</span> <span class="s">&quot;ID19&quot;</span>
+    <span class="n">experimenter_name</span> <span class="o">=</span> <span class="s">&quot;Christopher F. Powell&quot;</span>
+    <span class="n">experimenter_affiliation</span> <span class="o">=</span> <span class="s">&quot;Argone National Laboratory&quot;</span>
+    <span class="n">experimenter_email</span> <span class="o">=</span> <span class="s">&quot;powell@anl.gov&quot;</span>
+    <span class="n">source_mode</span> <span class="o">=</span> <span class="s">&quot;non top-up&quot;</span>
 
     <span class="n">projections_start</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">projections_end</span> <span class="o">=</span> <span class="mi">2003</span>
     <span class="n">white_start</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">white_end</span> <span class="o">=</span> <span class="mi">40</span>
     <span class="n">white_step</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="c">#    dark_start = 0</span>
-<span class="c">#    dark_end = 10</span>
-<span class="c">#    dark_step = 1</span>
+    <span class="n">dark_start</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">dark_end</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">dark_step</span> <span class="o">=</span> <span class="mi">1</span>
 
+    <span class="n">sample</span> <span class="o">=</span> <span class="mi">1</span>
     
-    <span class="c"># set to convert slices between slices_start and slices_end</span>
-    <span class="c"># if omitted all data set will be converted   </span>
-<span class="c">#    slices_start = 300    </span>
-<span class="c">#    slices_end = 304    </span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">sample</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0001_0210675/0001_0210675.edf&#39;</span>
+        <span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0001_0210675/dark.edf&#39;</span>
+        <span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0001_0210675/ref.edf&#39;</span>
+        <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/ESRF_0001.h5&#39;</span>
+        <span class="n">log_file</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0001_0210675/0001_0210675.info&#39;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">sample</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0002_0210675_2nd/0002_0210675_2nd.edf&#39;</span>
+        <span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/dark.edf&#39;</span>
+        <span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/ref.edf&#39;</span>
+        <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/ESRF_0002.h5&#39;</span>
+        <span class="n">log_file</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0002_0210675_2nd/0002_0210675_2nd.info&#39;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">sample</span> <span class="o">==</span> <span class="mi">3</span><span class="p">):</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0006_AV67_016_offsetAngleMinus12/0006_AV67_016_offsetAngleMinus12.edf&#39;</span>
+        <span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0006_AV67_016_offsetAngleMinus12/dark.edf&#39;</span>
+        <span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0006_AV67_016_offsetAngleMinus12/ref.edf&#39;</span>
+        <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/ESRF_0006.h5&#39;</span>
+        <span class="n">log_file</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0006_AV67_016_offsetAngleMinus12/0006_AV67_016_offsetAngleMinus12.info&#39;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">sample</span> <span class="o">==</span> <span class="mi">4</span><span class="p">):</span>
+        <span class="c"># white are missing</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0007_AV67_017_offsetAngle0/0007_AV67_017_offsetAngle0.edf&#39;</span>
+        <span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0007_AV67_017_offsetAngle0/dark.edf&#39;</span>
+        <span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0007_AV67_017_offsetAngle0/ref.edf&#39;</span>
+        <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/ESRF_0007.h5&#39;</span>
+        <span class="n">log_file</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0007_AV67_017_offsetAngle0/0007_AV67_017_offsetAngle0.info&#39;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">sample</span> <span class="o">==</span> <span class="mi">5</span><span class="p">):</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0008_AV67_024_offsetAngle0/0008_AV67_024_offsetAngle0.edf&#39;</span>
+        <span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0008_AV67_024_offsetAngle0/dark.edf&#39;</span>
+        <span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0008_AV67_024_offsetAngle0/ref.edf&#39;</span>
+        <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/ESRF_0008.h5&#39;</span>
+        <span class="n">log_file</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0008_AV67_024_offsetAngle0/0008_AV67_024_offsetAngle0.info&#39;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">sample</span> <span class="o">==</span> <span class="mi">6</span><span class="p">):</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0009_AV67_018_offsetAngle0/0009_AV67_018_offsetAngle0.edf&#39;</span>
+        <span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0009_AV67_018_offsetAngle0/dark.edf&#39;</span>
+        <span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0009_AV67_018_offsetAngle0/ref.edf&#39;</span>
+        <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/ESRF_0009.h5&#39;</span>
+        <span class="n">log_file</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0009_AV67_018_offsetAngle0/0009_AV67_018_offsetAngle0.info&#39;</span>
+
+        <span class="c"># only pre-white, dark are missing</span>
+        <span class="n">white_end</span> <span class="o">=</span> <span class="mi">41</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">sample</span> <span class="o">==</span> <span class="mi">7</span><span class="p">):</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0009_AV67_018_offsetAngle0_Redo/0009_AV67_018_offsetAngle0_Redo.edf&#39;</span>
+        <span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0009_AV67_018_offsetAngle0_Redo/dark.edf&#39;</span>
+        <span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0009_AV67_018_offsetAngle0_Redo/ref.edf&#39;</span>
+        <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/ESRF_0009_Redo.h5&#39;</span>
+        <span class="n">log_file</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0009_AV67_018_offsetAngle0_Redo/0009_AV67_018_offsetAngle0_Redo.info&#39;</span>
+
+        <span class="c"># DO NOT CONVERT stopped during data collection </span>
+    <span class="c">##    file_name = &#39;/local/dataraid/databank/ESRF_2013Dec/0011_AV67_022_offsetAngle0/0011_AV67_022_offsetAngle0.edf&#39;</span>
+    <span class="c">##    dark_file_name = &#39;/local/dataraid/databank/ESRF_2013Dec/0011_AV67_022_offsetAngle0/dark.edf&#39;</span>
+    <span class="c">##    white_file_name = &#39;/local/dataraid/databank/ESRF_2013Dec/0011_AV67_022_offsetAngle0/ref.edf&#39;</span>
+    <span class="c">##    hdf5_file_name = &#39;/local/dataraid/databank/dataExchange/ESRF_0011.h5&#39;</span>
+    <span class="c">##    sample_name = &#39;0011_AV67_022_offsetAngle0&#39;</span>
+    <span class="c">##    white_end = 41</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">sample</span> <span class="o">==</span> <span class="mi">8</span><span class="p">):</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0012_AV67_022_offsetAngle0/0012_AV67_022_offsetAngle0.edf&#39;</span>
+        <span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0012_AV67_022_offsetAngle0/dark.edf&#39;</span>
+        <span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0012_AV67_022_offsetAngle0/ref.edf&#39;</span>
+        <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/ESRF_0012.h5&#39;</span>
+        <span class="n">log_file</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0012_AV67_022_offsetAngle0/0012_AV67_022_offsetAngle0.info&#39;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">sample</span> <span class="o">==</span> <span class="mi">9</span><span class="p">):</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0013_AV67_026_offsetAngle0/0013_AV67_026_offsetAngle0.edf&#39;</span>
+        <span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0013_AV67_026_offsetAngle0/dark.edf&#39;</span>
+        <span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0013_AV67_026_offsetAngle0/ref.edf&#39;</span>
+        <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/ESRF_0013.h5&#39;</span>
+        <span class="n">log_file</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0013_AV67_026_offsetAngle0/0013_AV67_026_offsetAngle0.info&#39;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">sample</span> <span class="o">==</span> <span class="mi">10</span><span class="p">):</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0014_AV67_028_offsetAngle0/0014_AV67_028_offsetAngle0.edf&#39;</span>
+        <span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0014_AV67_028_offsetAngle0/dark.edf&#39;</span>
+        <span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0014_AV67_028_offsetAngle0/ref.edf&#39;</span>
+        <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/ESRF_0014.h5&#39;</span>
+        <span class="n">log_file</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0014_AV67_028_offsetAngle0/0014_AV67_028_offsetAngle0.info&#39;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">sample</span> <span class="o">==</span> <span class="mi">11</span><span class="p">):</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0015_AV67_020_offsetAngle0/0015_AV67_020_offsetAngle0.edf&#39;</span>
+        <span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0015_AV67_020_offsetAngle0/dark.edf&#39;</span>
+        <span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0015_AV67_020_offsetAngle0/ref.edf&#39;</span>
+        <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/ESRF_0015.h5&#39;</span>
+        <span class="n">log_file</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0015_AV67_020_offsetAngle0/0015_AV67_020_offsetAngle0.info&#39;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">sample</span> <span class="o">==</span> <span class="mi">12</span><span class="p">):</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0016_AV67_029_offsetAngle0/0016_AV67_029_offsetAngle0.edf&#39;</span>
+        <span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0016_AV67_029_offsetAngle0/dark.edf&#39;</span>
+        <span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0016_AV67_029_offsetAngle0/ref.edf&#39;</span>
+        <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/ESRF_0016.h5&#39;</span>
+        <span class="n">log_file</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0016_AV67_029_offsetAngle0/0016_AV67_029_offsetAngle0.info&#39;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">sample</span> <span class="o">==</span> <span class="mi">13</span><span class="p">):</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0017_AV67_025_offsetAngle0/0017_AV67_025_offsetAngle0.edf&#39;</span>
+        <span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0017_AV67_025_offsetAngle0/dark.edf&#39;</span>
+        <span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0017_AV67_025_offsetAngle0/ref.edf&#39;</span>
+        <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/ESRF_0017.h5&#39;</span>
+        <span class="n">sample_name</span> <span class="o">=</span> <span class="s">&#39;0017_AV67_025_offsetAngle0&#39;</span>
+        <span class="n">log_file</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0017_AV67_025_offsetAngle0/0017_AV67_025_offsetAngle0.info&#39;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">sample</span> <span class="o">==</span> <span class="mi">14</span><span class="p">):</span>
+        <span class="c"># white are missing</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0018_AV67_011_offsetAngle0/0018_AV67_011_offsetAngle0.edf&#39;</span>
+        <span class="n">dark_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0018_AV67_011_offsetAngle0/dark.edf&#39;</span>
+        <span class="n">white_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0018_AV67_011_offsetAngle0/ref.edf&#39;</span>
+        <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/dataExchange/ESRF_0018.h5&#39;</span>
+        <span class="n">log_file</span> <span class="o">=</span> <span class="s">&#39;/local/dataraid/databank/ESRF_2013Dec/0018_AV67_011_offsetAngle0/0018_AV67_011_offsetAngle0.info&#39;</span>
+
+    <span class="c">#Read ESRF log file data</span>
+    <span class="nb">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_file</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">file</span><span class="p">:</span>
+        <span class="n">linelist</span><span class="o">=</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;=&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">linelist</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&quot;Energy&quot;</span><span class="p">):</span>
+                <span class="n">energy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&quot;Prefix&quot;</span><span class="p">):</span>
+                <span class="n">sample_name</span> <span class="o">=</span> <span class="n">linelist</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&quot;PixelSize&quot;</span><span class="p">):</span>
+                 <span class="n">actual_pixel_size</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&quot;Distance&quot;</span><span class="p">):</span>
+                 <span class="n">acquisition_comment</span> <span class="o">=</span> <span class="s">&#39;Distance sample to detector = &#39;</span> <span class="o">+</span> <span class="n">linelist</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; mm&#39;</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&quot;TOMO_N&quot;</span><span class="p">):</span>
+                 <span class="n">projections_end</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&quot;REF_N&quot;</span><span class="p">):</span>
+                 <span class="n">white_end</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&quot;Date&quot;</span><span class="p">):</span>
+                 <span class="n">source_datetime</span> <span class="o">=</span> <span class="n">linelist</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&quot;Scan_Type&quot;</span><span class="p">):</span>
+                 <span class="n">acquisition_mode</span> <span class="o">=</span> <span class="n">linelist</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&quot;SrCurrent&quot;</span><span class="p">):</span>
+                 <span class="n">current</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">linelist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s">&quot;Comment&quot;</span><span class="p">):</span>
+                 <span class="n">instrument_comment</span> <span class="o">=</span> <span class="n">linelist</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+    <span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="n">mydata</span> <span class="o">=</span> <span class="n">dx</span><span class="o">.</span><span class="n">Import</span><span class="p">()</span>
     <span class="c"># Read series of images</span>
@@ -105,16 +237,14 @@
                                                        <span class="n">white_start</span> <span class="o">=</span> <span class="n">white_start</span><span class="p">,</span>
                                                        <span class="n">white_end</span> <span class="o">=</span> <span class="n">white_end</span><span class="p">,</span>
                                                        <span class="n">white_step</span> <span class="o">=</span> <span class="n">white_step</span><span class="p">,</span>
-<span class="c">#                                                       dark_file_name = dark_file_name,</span>
-<span class="c">#                                                       dark_start = dark_start,</span>
-<span class="c">#                                                       dark_end = dark_end,</span>
-<span class="c">#                                                       dark_step = dark_step,</span>
+                                                       <span class="n">dark_file_name</span> <span class="o">=</span> <span class="n">dark_file_name</span><span class="p">,</span>
+                                                       <span class="n">dark_start</span> <span class="o">=</span> <span class="n">dark_start</span><span class="p">,</span>
+                                                       <span class="n">dark_end</span> <span class="o">=</span> <span class="n">dark_end</span><span class="p">,</span>
+                                                       <span class="n">dark_step</span> <span class="o">=</span> <span class="n">dark_step</span><span class="p">,</span>
                                                        <span class="n">projections_digits</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
                                                        <span class="n">white_digits</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
-<span class="c">#                                                       dark_digits = 4,</span>
+                                                       <span class="n">dark_digits</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
                                                        <span class="n">projections_zeros</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
-<span class="c">#                                                       slices_start = slices_start,</span>
-<span class="c">#                                                       slices_end = slices_end,</span>
                                                        <span class="n">data_type</span><span class="o">=</span><span class="s">&#39;edf2&#39;</span><span class="p">,</span>
                                                        <span class="n">log</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span>
                                                        <span class="p">)</span>
@@ -125,10 +255,33 @@
                           <span class="n">data_white</span> <span class="o">=</span> <span class="n">white</span><span class="p">,</span>
                           <span class="n">data_dark</span> <span class="o">=</span> <span class="n">dark</span><span class="p">,</span>
                           <span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span><span class="p">,</span>
-                          <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="n">hdf5_file_name</span><span class="p">,</span>
+                          <span class="n">data_exchange_type</span> <span class="o">=</span> <span class="s">&#39;tomography_raw_projections&#39;</span><span class="p">,</span>
+                          <span class="n">source_name</span> <span class="o">=</span> <span class="n">source_name</span><span class="p">,</span>
+                          <span class="n">source_mode</span> <span class="o">=</span> <span class="n">source_mode</span><span class="p">,</span>
+                          <span class="n">source_datetime</span> <span class="o">=</span> <span class="n">source_datetime</span><span class="p">,</span>
+                          <span class="n">beamline</span> <span class="o">=</span> <span class="n">beamline</span><span class="p">,</span>
+                          <span class="n">energy</span> <span class="o">=</span> <span class="n">energy</span><span class="p">,</span>
+                          <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="p">,</span>
+                          <span class="n">actual_pixel_size</span> <span class="o">=</span> <span class="n">actual_pixel_size</span><span class="p">,</span>
+                          <span class="n">experimenter_name</span> <span class="o">=</span> <span class="n">experimenter_name</span><span class="p">,</span>
+                          <span class="n">experimenter_affiliation</span> <span class="o">=</span> <span class="n">experimenter_affiliation</span><span class="p">,</span>
+                          <span class="n">experimenter_email</span> <span class="o">=</span> <span class="n">experimenter_email</span><span class="p">,</span>
+                          <span class="n">instrument_comment</span> <span class="o">=</span> <span class="n">instrument_comment</span><span class="p">,</span>
                           <span class="n">sample_name</span> <span class="o">=</span> <span class="n">sample_name</span><span class="p">,</span>
-                          <span class="n">data_exchange_type</span> <span class="o">=</span> <span class="s">&#39;tomography_raw_projections&#39;</span>
+                          <span class="n">acquisition_mode</span> <span class="o">=</span> <span class="n">acquisition_mode</span><span class="p">,</span>
+                          <span class="n">acquisition_comment</span> <span class="o">=</span> <span class="n">acquisition_comment</span><span class="p">,</span>
+                          <span class="n">hdf5_file_name</span> <span class="o">=</span> <span class="n">hdf5_file_name</span><span class="p">,</span>
                           <span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;energy: &quot;</span><span class="p">,</span> <span class="n">energy</span>
+    <span class="k">print</span> <span class="s">&quot;sample name: &quot;</span><span class="p">,</span> <span class="n">sample_name</span>
+    <span class="k">print</span> <span class="s">&quot;pixel size: &quot;</span><span class="p">,</span> <span class="n">actual_pixel_size</span>
+    <span class="k">print</span> <span class="s">&quot;projections: &quot;</span><span class="p">,</span> <span class="n">projections_end</span>
+    <span class="k">print</span> <span class="s">&quot;whites: &quot;</span><span class="p">,</span> <span class="n">white_end</span>
+    <span class="k">print</span> <span class="s">&quot;experiment date: &quot;</span><span class="p">,</span> <span class="n">source_datetime</span>
+    <span class="k">print</span> <span class="s">&quot;scan mode: &quot;</span><span class="p">,</span> <span class="n">acquisition_mode</span>
+    <span class="k">print</span> <span class="s">&quot;acquitition comment: &quot;</span><span class="p">,</span> <span class="n">acquisition_comment</span>
+    <span class="k">print</span> <span class="s">&quot;current: &quot;</span><span class="p">,</span> <span class="n">current</span>
+    <span class="k">print</span> <span class="s">&quot;instrument comment: &quot;</span><span class="p">,</span> <span class="n">instrument_comment</span>
 </div>
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>

@@ -78,21 +78,58 @@
 <span class="kn">from</span> <span class="nn">data_exchange</span> <span class="kn">import</span> <span class="n">DataExchangeFile</span><span class="p">,</span> <span class="n">DataExchangeEntry</span>
 
 <div class="viewcode-block" id="Export"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_exporter.html#dataexchange.xtomo.xtomo_exporter.Export">[docs]</a><span class="k">class</span> <span class="nc">Export</span><span class="p">():</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data_white</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                 <span class="n">data_dark</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">hdf5_file_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data_exchange_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">sample_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span><span class="p">):</span>
-
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                    <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                    <span class="n">data_white</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                    <span class="n">data_dark</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                    <span class="n">theta</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">data_exchange_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">source_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">source_mode</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">source_datetime</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">beamline</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">energy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">current</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">actual_pixel_size</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">experimenter_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                    <span class="n">experimenter_affiliation</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                    <span class="n">experimenter_email</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                    <span class="n">instrument_comment</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>  
+                    <span class="n">sample_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                    <span class="n">sample_comment</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">acquisition_mode</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">acquisition_comment</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">hdf5_file_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                    <span class="n">logger</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                    <span class="n">log</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span><span class="p">):</span>
         <span class="c"># Set the log level.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log_level</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">log</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_logging</span><span class="p">()</span>
 
-
-<div class="viewcode-block" id="Export.xtomo_exchange"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_exporter.html#dataexchange.xtomo.xtomo_exporter.Export.xtomo_exchange">[docs]</a>    <span class="k">def</span> <span class="nf">xtomo_exchange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_white</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data_dark</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sample_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                       <span class="n">data_exchange_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                       <span class="n">hdf5_file_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                       <span class="n">log</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span>
+<div class="viewcode-block" id="Export.xtomo_exchange"><a class="viewcode-back" href="../../../resources/dataexchange.xtomo.xtomo_exporter.html#dataexchange.xtomo.xtomo_exporter.Export.xtomo_exchange">[docs]</a>    <span class="k">def</span> <span class="nf">xtomo_exchange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                        <span class="n">data</span><span class="p">,</span> 
+                        <span class="n">data_white</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                        <span class="n">data_dark</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                        <span class="n">theta</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                        <span class="n">data_exchange_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">source_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">source_mode</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                        <span class="n">source_datetime</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">beamline</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">energy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">current</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">actual_pixel_size</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">experimenter_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                        <span class="n">experimenter_affiliation</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                        <span class="n">experimenter_email</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                        <span class="n">instrument_comment</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>  
+                        <span class="n">sample_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">sample_comment</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">acquisition_mode</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">acquisition_comment</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">hdf5_file_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">log</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span>
                        <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        Write 3-D data to a data-exchange file.</span>
@@ -114,9 +151,33 @@
 <span class="sd">            Data acquisition angles corresponding</span>
 <span class="sd">            to each projection.</span>
 
-<span class="sd">        data_excahnge_type : str</span>
+<span class="sd">        data_excahnge_type : str, optional</span>
 <span class="sd">            label defyining the type of data contained in data exchange file</span>
 <span class="sd">            for raw data tomography data use &#39;tomography_raw_projections&#39;</span>
+
+<span class="sd">        source_name, source_mode, source_datetime : str, optional</span>
+<span class="sd">            label defining the source name, operation mode and date/time when these values were taken</span>
+
+<span class="sd">        beamline : str, optional</span>
+<span class="sd">            label defining the beamline name</span>
+<span class="sd">        </span>
+<span class="sd">        energy, current : float, optional</span>
+<span class="sd">            X-ray energy and bean current</span>
+
+<span class="sd">        actual_pixel_size : float, optional</span>
+<span class="sd">            pixel size on the sample plane</span>
+<span class="sd"> </span>
+<span class="sd">        experimenter_name, experimenter_affiliation, experimenter_email : str, optional</span>
+<span class="sd">            user name, affiliation and e-mail address</span>
+
+<span class="sd">        instrument_comment : str, optional</span>
+<span class="sd">            instrument comment</span>
+
+<span class="sd">        sample_name, sample_comment : str, optional</span>
+<span class="sd">            sample name and comment</span>
+<span class="sd">        </span>
+<span class="sd">        acquisition_mode, acquisition_comment : str, optional</span>
+<span class="sd">            acquisition mode and comment</span>
 
 <span class="sd">        hd5_file_name : str</span>
 <span class="sd">            Output file.</span>
@@ -220,14 +281,51 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;data white is not defined&quot;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">data_exchange_type</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Adding data type to  Data Exchange File [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">hdf5_file_name</span><span class="p">)</span>
-                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span> <span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">data_exchange_type</span><span class="p">}))</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">data_exchange_type</span><span class="p">}))</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">source_name</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">source</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">source_name</span><span class="p">}))</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">source_mode</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">source</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="n">source_mode</span><span class="p">}))</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">source_datetime</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">source</span><span class="p">(</span><span class="n">datetime</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">source_datetime</span><span class="p">}))</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">beamline</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">source</span><span class="p">(</span><span class="n">beamline</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">beamline</span><span class="p">}))</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">energy</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">monochromator</span><span class="p">(</span><span class="n">energy</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">energy</span><span class="p">,</span> <span class="s">&#39;units&#39;</span><span class="p">:</span> <span class="s">&#39;keV&#39;</span><span class="p">,</span> <span class="s">&#39;dataset_opts&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;dtype&#39;</span><span class="p">:</span> <span class="s">&#39;d&#39;</span><span class="p">}}))</span>                    
+                <span class="k">if</span> <span class="p">(</span><span class="n">current</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">source</span><span class="p">(</span><span class="n">current</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">current</span><span class="p">,</span> <span class="s">&#39;units&#39;</span><span class="p">:</span> <span class="s">&#39;mA&#39;</span><span class="p">,</span> <span class="s">&#39;dataset_opts&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;dtype&#39;</span><span class="p">:</span> <span class="s">&#39;d&#39;</span><span class="p">}}))</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">actual_pixel_size</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">detector</span><span class="p">(</span><span class="n">x_actual_pixel_size</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">actual_pixel_size</span><span class="p">,</span> <span class="s">&#39;units&#39;</span><span class="p">:</span> <span class="s">&#39;microns&#39;</span><span class="p">,</span> <span class="s">&#39;dataset_opts&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;dtype&#39;</span><span class="p">:</span> <span class="s">&#39;d&#39;</span><span class="p">}},</span> 
+                                                            <span class="n">y_actual_pixel_size</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">actual_pixel_size</span><span class="p">,</span> <span class="s">&#39;units&#39;</span><span class="p">:</span> <span class="s">&#39;microns&#39;</span><span class="p">,</span> <span class="s">&#39;dataset_opts&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;dtype&#39;</span><span class="p">:</span> <span class="s">&#39;d&#39;</span><span class="p">}}))</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">experimenter_name</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">experimenter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="n">experimenter_name</span><span class="p">}))</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">experimenter_affiliation</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">experimenter</span><span class="p">(</span><span class="n">affiliation</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="n">experimenter_affiliation</span><span class="p">}))</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">experimenter_email</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">experimenter</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="n">experimenter_email</span><span class="p">}))</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">instrument_comment</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">instrument</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="n">instrument_comment</span><span class="p">}))</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">sample_name</span> <span class="o">==</span> <span class="bp">None</span><span class="p">):</span>
                     <span class="n">sample_name</span> <span class="o">=</span> <span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span> <span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="n">sample_name</span><span class="p">},</span> <span class="n">description</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="s">&#39;Sample name was assigned by the HDF5 converter and based on the HDF5 file name&#39;</span><span class="p">}))</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="n">sample_name</span><span class="p">},</span> <span class="n">description</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="s">&#39;Sample name assigned by the HDF5 converter and based on the HDF5 file name&#39;</span><span class="p">}))</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span> <span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="n">sample_name</span><span class="p">},</span> <span class="n">description</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="s">&#39;Sample name was read from the user log file&#39;</span><span class="p">}))</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="n">sample_name</span><span class="p">}))</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">sample_comment</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="n">sample_comment</span><span class="p">}))</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">acquisition_mode</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">acquisition</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="n">acquisition_mode</span><span class="p">}))</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">acquisition_comment</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">DataExchangeEntry</span><span class="o">.</span><span class="n">acquisition</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;value&#39;</span><span class="p">:</span><span class="n">acquisition_comment</span><span class="p">}))</span>
+
                 <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;DONE!!!!. Created Data Exchange File [</span><span class="si">%s</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">hdf5_file_name</span><span class="p">)</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Nothing to do ...&quot;</span><span class="p">)</span>
             
