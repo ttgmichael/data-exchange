@@ -113,3 +113,6 @@ docs/trunk/*
 tmp/
 validate*
 workingOn/
+rec*.py
+convert*.py
+

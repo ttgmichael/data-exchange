@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>About &mdash; Data Exchange 0.2 documentation</title>
+    <title>License &mdash; Data Exchange 0.2 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -24,10 +24,10 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="author" title="About these documents" href="#" />
+    <link rel="author" title="About these documents" href="about.html" />
     <link rel="top" title="Data Exchange 0.2 documentation" href="index.html" />
-    <link rel="next" title="Citing" href="cite.html" />
-    <link rel="prev" title="Welcome to Data Exchange’s documentation!" href="index.html" /> 
+    <link rel="next" title="Examples" href="resources/demo.html" />
+    <link rel="prev" title="xrm (xradia)" href="resources/dataexchange.xtomo.formats.xradia_xrm.html" /> 
   </head>
   <body>
     <div class="related">
@@ -40,10 +40,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="cite.html" title="Citing"
+          <a href="resources/demo.html" title="Examples"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to Data Exchange’s documentation!"
+          <a href="resources/dataexchange.xtomo.formats.xradia_xrm.html" title="xrm (xradia)"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">Data Exchange 0.2 documentation</a> &raquo;</li> 
       </ul>
@@ -54,13 +54,48 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="about">
-<h1>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h1>
-<p>Data Exchange is a simple data model that is designed to interface, or &#8220;exchange&#8221; data among different instruments, and to enable sharing of data analysis tools. Its implementation uses the Heirarchical Data Format (HDF5), a widely used and supported storage format for scientific data.</p>
-<p>The Data Exchange definition is highly simplified and focuses on technique rather than instrument descriptions, and on provenance for tracking analysis steps and results. It provides standardization for metadata and the core acquired or analyzed data arrays, while also allowing flexibility for technique or even individual instrument variations.</p>
-<p>The key principle of Data Exchange is that for each experimental technique, there is often one particular set of data array that an analysis or visualization program, or researcher will want to access. For example, in X-ray tomography this may be a series of normalized projections or a series of raw projections, followed by white and dark fields arrays.</p>
-<p>Data Exchange definition is also set to maximize both the future extensibility of a file to meet evolving data acquisition schemes and data analysis tools, and to improve human readability via h5dump or HDFView so that one can manually examine and understand the file content without access to the computer code used to write it.</p>
-<p>This key array, or set of arrays, is placed into an HDF5 group called &#8220;exchange&#8221; for easy identification.</p>
+  <div class="section" id="license">
+<h1>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h1>
+<p>Copyright (c) 2013-2015, UChicago Argonne, LLC. All rights reserved.</p>
+<p>Copyright 2013-2015. UChicago Argonne, LLC. This software was produced
+under U.S. Government contract DE-AC02-06CH11357 for Argonne National
+Laboratory (ANL), which is operated by UChicago Argonne, LLC for the
+U.S. Department of Energy. The U.S. Government has rights to use,
+reproduce, and distribute this software.  NEITHER THE GOVERNMENT NOR
+UChicago Argonne, LLC MAKES ANY WARRANTY, EXPRESS OR IMPLIED, OR
+ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.  If software is
+modified to produce derivative works, such modified software should
+be clearly marked, so as not to confuse it with the version available
+from ANL.</p>
+<p>Additionally, redistribution and use in source and binary forms, with
+or without modification, are permitted provided that the following
+conditions are met:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.</li>
+<li>Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in
+the documentation and/or other materials provided with the
+distribution.</li>
+<li>Neither the name of UChicago Argonne, LLC, Argonne National
+Laboratory, ANL, the U.S. Government, nor the names of its
+contributors may be used to endorse or promote products derived
+from this software without specific prior written permission.</li>
+</ul>
+</div></blockquote>
+<p>THIS SOFTWARE IS PROVIDED BY UChicago Argonne, LLC AND CONTRIBUTORS
+&#8220;AS IS&#8221; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL UChicago
+Argonne, LLC OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.</p>
 </div>
 
 
@@ -70,14 +105,14 @@
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">Welcome to Data Exchange&#8217;s documentation!</a></p>
+  <p class="topless"><a href="resources/dataexchange.xtomo.formats.xradia_xrm.html"
+                        title="previous chapter">xrm (xradia)</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="cite.html"
-                        title="next chapter">Citing</a></p>
+  <p class="topless"><a href="resources/demo.html"
+                        title="next chapter">Examples</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
-    <li><a href="_sources/about.txt"
+    <li><a href="_sources/license.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
 <div id="searchbox" style="display: none">
@@ -107,10 +142,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="cite.html" title="Citing"
+          <a href="resources/demo.html" title="Examples"
              >next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to Data Exchange’s documentation!"
+          <a href="resources/dataexchange.xtomo.formats.xradia_xrm.html" title="xrm (xradia)"
              >previous</a> |</li>
         <li><a href="index.html">Data Exchange 0.2 documentation</a> &raquo;</li> 
       </ul>

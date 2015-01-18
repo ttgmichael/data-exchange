@@ -70,10 +70,8 @@
 
 <span class="sd">Examples</span>
 
-<span class="sd">&gt;&gt;&gt; import dataexchange.xtomo.xtomo_importer as dx</span>
-<span class="sd">&gt;&gt;&gt; import dataexchange.xtomo.xtomo_exporter as ex</span>
-<span class="sd">&gt;&gt;&gt; </span>
-<span class="sd">&gt;&gt;&gt; </span>
+<span class="sd">&gt;&gt;&gt; import dataexchange</span>
+<span class="sd">&gt;&gt;&gt;  </span>
 <span class="sd">&gt;&gt;&gt; file_name = &#39;/local/data/radios/image_.tif&#39;</span>
 <span class="sd">&gt;&gt;&gt; dark_file_name = &#39;/local/data/darks/image_.tif&#39;</span>
 <span class="sd">&gt;&gt;&gt; white_file_name = &#39;/local/data/flats/image_.tif&#39;</span>
@@ -89,9 +87,9 @@
 <span class="sd">&gt;&gt;&gt; </span>
 <span class="sd">&gt;&gt;&gt; sample_name = &#39;Anka&#39;</span>
 <span class="sd">&gt;&gt;&gt;     </span>
-<span class="sd">&gt;&gt;&gt; mydata = dx.Import()</span>
-<span class="sd">&gt;&gt;&gt; # Read series of images</span>
-<span class="sd">&gt;&gt;&gt; data, white, dark, theta = mydata.xtomo_raw(file_name,</span>
+<span class="sd">&gt;&gt;&gt; # Read raw data</span>
+<span class="sd">&gt;&gt;&gt; read = dataexchange.Import()</span>
+<span class="sd">&gt;&gt;&gt; data, white, dark, theta = read.xtomo_raw(file_name,</span>
 <span class="sd">&gt;&gt;&gt;                                                    projections_start = projections_start,</span>
 <span class="sd">&gt;&gt;&gt;                                                    projections_end = projections_end,</span>
 <span class="sd">&gt;&gt;&gt;                                                    white_file_name = white_file_name,</span>
@@ -124,7 +122,7 @@
 
         <span class="c"># Logging init.</span>
         <span class="k">if</span> <span class="n">color_log</span><span class="p">:</span> <span class="c"># enable colored logging</span>
-            <span class="kn">from</span> <span class="nn">tomopy.tools</span> <span class="kn">import</span> <span class="n">colorer</span>
+            <span class="kn">from</span> <span class="nn">dataexchange.tools</span> <span class="kn">import</span> <span class="n">colorer</span>
 
         <span class="c"># Set the log level.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="bp">None</span>
@@ -1019,7 +1017,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2014, Argonne National Laboratory.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
 </html>
