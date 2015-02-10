@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Read tomographic image data from various format files.
 
-Supported image fomats include TIFF, PackBits and LZW encoded TIFF, 
-HDF5 (Data Exchange and NeXuS), HDF4 (NeXuS), SPE, TXRM, XRM, EDF, 
-DPT, netCDF. 
+Supported image fomats include TIFF, PackBits and LZW encoded TIFF,
+HDF5 (Data Exchange and NeXuS), HDF4 (NeXuS), SPE, TXRM, XRM, EDF,
+DPT, netCDF.
 
 .. module:: xtomo_importer.py
    :platform: Unix
@@ -20,22 +20,22 @@ DPT, netCDF.
 Examples
 
 >>> import dataexchange
->>>  
+>>>
 >>> file_name = '/local/data/radios/image_.tif'
 >>> dark_file_name = '/local/data/darks/image_.tif'
 >>> white_file_name = '/local/data/flats/image_.tif'
->>> 
+>>>
 >>> hdf5_file_name = '/local/data/dataExchange/Anka.h5'
->>> 
+>>>
 >>> projections_start = 0
 >>> projections_end = 3167
 >>> white_start = 0
 >>> white_end = 100
 >>> dark_start = 0
 >>> dark_end = 100
->>> 
+>>>
 >>> sample_name = 'Anka'
->>>     
+>>>
 >>> # Read raw data
 >>> read = dataexchange.Import()
 >>> data, white, dark, theta = read.xtomo_raw(file_name,
@@ -96,8 +96,8 @@ class Import():
                          dark_start=0,
                          dark_end=0,
                          dark_step=1,
-                         projections_angle_start = 0,
-                         projections_angle_end = 180,
+                         projections_angle_start=0,
+                         projections_angle_end=180,
                          projections_zeros=True,
                          projections_digits=-1,
                          white_digits=None,
@@ -106,13 +106,13 @@ class Import():
                          dark_zeros=True,
                          dtype='uint16',
                          data_type='tiff',
-                         exchange_rank = 0,
+                         exchange_rank=0,
                          log='INFO'):
         """
         Read a stack of 2-D HDF4, TIFF, spe or netCDF images.
 
         Parameters
-        
+
         file_name : str
             Base name of the input HDF4 or TIFF files.
             For example if the projections names are /local/data/test_XXXX.hdf
@@ -176,17 +176,18 @@ class Import():
                 - ``spe``: spe data from APS 13-BM
                 - ``tiff``: uncompressed regualar tiff files used at Petra III, ALS, Elettra, SLS, Australia, CHESS
                 - ``xradia``: txrm and xrm used by all Xradia systems
+                - ``als_hdf5``: h5 files obtained via SPOT.NERSC at the ALS
 
 
         exchange_rank : int, optional
             set when reading Data Exchange HDF5 files
             exchange rank is added to "exchange" to point tomopy to the data to recontruct.
             if rank is not set then the data are raw from the detector and are located under
-            exchange = "exchange/...", to process data that are the result of some intemedite 
+            exchange = "exchange/...", to process data that are the result of some intermediate 
             processing step then exchange_rank = 1 will direct tomopy to process "exchange1/..."
 
         Returns
-        
+
         Output : data, data_white, data_dark, theta
 
        """
@@ -200,8 +201,8 @@ class Import():
                 white_file_name = "does_not_exist"
             if dark_file_name is None:
                 dark_file_name = "does_not_exist"
-            
-        else:    
+
+        else:
             # Set default prefix for white and dark series of files.
             if white_file_name is None:
                 white_file_name = file_name
@@ -240,6 +241,15 @@ class Import():
                 dark_file_name.endswith('hdf'):
                 data_file_dark = os.path.splitext(dark_file_name)[0]
 
+        elif (data_type is 'als_hdf5'):
+            data_file = os.path.split(file_name)[1]
+            if '.h5&' in data_file: 
+                data_file = data_file.split('&')[1]
+            real_file_name = file_name.split('&')[0]
+            dataExtension = ".tif"
+            data_file_white = white_file_name
+            data_file_dark = dark_file_name
+            
         elif (data_type is 'nxs'):
             if file_name.endswith('NXS') or \
                 file_name.endswith('nxs'):
@@ -387,11 +397,14 @@ class Import():
         for m in range(len(ind)):
             for n in range(projections_digits):
                 if ind[m] < np.power(10, n+1):
-                    _file_name = data_file + projections_file_index[n] + str(ind[m]) + dataExtension
-                    self.logger.info("Generating projection file names: [%s]", _file_name)                    
+                    if (data_type is 'als_hdf5'):
+                        _file_name = data_file + '_0000_' + projections_file_index[n] + str(ind[m]) + dataExtension
+                    else:
+                        _file_name = data_file + projections_file_index[n] + str(ind[m]) + dataExtension
+                    self.logger.info("Generating projection file names: [%s]", _file_name)
                     break
 
-            if os.path.isfile(_file_name):
+            if (os.path.isfile(_file_name) or (dataExtension is '.tif')):
                 projection_exist = True
                 self.logger.info("Reading projection file: [%s]", os.path.realpath(_file_name))
                 self.logger.info("data type: [%s]", data_type)
@@ -408,6 +421,17 @@ class Import():
                                      x_end=slices_end,
                                      x_step=slices_step,
                                      array_name='/entry/data/data')
+
+                elif (data_type is 'als_hdf5'):
+                    f = XTomoReader(real_file_name)
+                    #print real_file_name
+                    #print data_file
+                    array_name='/'.join([file_name.split('&')[1], _file_name])
+                    #print array_name
+                    tmpdata = f.hdf5(x_start=slices_start,
+                                     x_end=slices_end,
+                                     x_step=slices_step,
+                                     array_name='/'.join([file_name.split('&')[1], _file_name]))
 
                 elif (data_type is 'compressed_tiff'):
                     tmpdata = f.tiffc(x_start=slices_start,
@@ -440,9 +464,13 @@ class Import():
                     (data_type is 'compressed_tiff') or
                     (data_type is 'hdf4') or
                     (data_type is 'edf2') or
-                    (data_type is 'hdf5')):
+                    (data_type is 'hdf5') or
+                    (data_type is 'als_hdf5')):
                     if m == 0: # Get resolution once.
-                        input_data = np.empty((len(ind), tmpdata.shape[0], tmpdata.shape[1]), dtype=dtype)
+                        if (data_type is 'als_hdf5'):
+                            input_data = np.empty((len(ind), tmpdata.shape[1], tmpdata.shape[2]), dtype=dtype)
+                        else:
+                            input_data = np.empty((len(ind), tmpdata.shape[0], tmpdata.shape[1]), dtype=dtype)
                     input_data[m, :, :] = tmpdata
 
                 if ((data_type is 'spe') or
@@ -488,7 +516,7 @@ class Import():
                                         y_start = slices_start,
                                     	y_end = slices_end,
                                     	y_step = slices_step,
-					x_start = pixels_start,
+					                            x_start = pixels_start,
                                     	x_end = pixels_end,
                                     	x_step = pixels_step,
                                     	array_type= array_type)
@@ -531,11 +559,14 @@ class Import():
         for m in range(len(ind)):
             for n in range(white_digits):
                 if ind[m] < np.power(10, n+1):
-                    _file_name = data_file_white + white_file_index[n] + str(ind[m]) + dataExtension
+                    if data_type is 'als_hdf5':
+                        _file_name = data_file_white + white_file_index[n] + str(ind[m]) + '_' + str(projections_end-1) + dataExtension
+                    else:
+                        _file_name = data_file_white + white_file_index[n] + str(ind[m]) + dataExtension
                     self.logger.info("Generating white file names: [%s]", _file_name)
                     break
 
-            if os.path.isfile(_file_name):
+            if (os.path.isfile(_file_name) or (dataExtension is '.tif')):
                 white_exist = True
                 self.logger.info("Reading white file: [%s]", os.path.realpath(_file_name))
                 self.logger.info("data type: [%s]", data_type)
@@ -553,6 +584,13 @@ class Import():
                                      x_end=slices_end,
                                      x_step=slices_step,
                                      array_name='data')
+
+                elif (data_type is 'als_hdf5'):
+                    f = XTomoReader(real_file_name)
+                    tmpdata = f.hdf5(x_start=slices_start,
+                                        x_end=slices_end,
+                                        x_step=slices_step,
+                                        array_name='/'.join([file_name.split('&')[1], _file_name]))
 
                 elif (data_type is 'compressed_tiff'):
                     tmpdata = f.tiffc(x_start=slices_start,
@@ -586,12 +624,13 @@ class Import():
                     (data_type is 'compressed_tiff') or
                     (data_type is 'hdf4') or
                     (data_type is 'edf2') or
-                    (data_type is 'hdf5')):
+                    (data_type is 'hdf5') or
+                    (data_type is 'als_hdf5')):
                     if m == 0: # Get resolution once.
-                        input_data = np.empty((len(ind),
-                                             tmpdata.shape[0],
-                                             tmpdata.shape[1]),
-                                             dtype=dtype)
+                        if (data_type is 'als_hdf5'):
+                            input_data = np.empty((len(ind), tmpdata.shape[1], tmpdata.shape[2]), dtype=dtype)
+                        else:
+                            input_data = np.empty((len(ind), tmpdata.shape[0], tmpdata.shape[1]), dtype=dtype)
                     input_data[m, :, :] = tmpdata
 
                 if ((data_type is 'spe') or
@@ -699,11 +738,14 @@ class Import():
         for m in range(len(ind)):
             for n in range(dark_digits):
                 if ind[m] < np.power(10, n + 1):
-                    _file_name = data_file_dark + dark_file_index[n] + str(ind[m]) + dataExtension
+                    if data_type is 'als_hdf5':
+                        _file_name = data_file_dark + dark_file_index[n] + str(ind[m]) + '_' + str(projections_end-1) + dataExtension
+                    else:
+                        _file_name = data_file_dark + dark_file_index[n] + str(ind[m]) + dataExtension
                     self.logger.info("Generating dark file names: [%s]", _file_name)
                     break
 
-            if os.path.isfile(_file_name):
+            if (os.path.isfile(_file_name) or (dataExtension is '.tif')):
                 dark_exist = True
                 self.logger.info("Reading dark file: [%s]", os.path.realpath(_file_name))
                 self.logger.info("data type: [%s]", data_type)
@@ -721,6 +763,13 @@ class Import():
                                      x_end=slices_end,
                                      x_step=slices_step,
                                      array_name='data')
+
+                elif (data_type is 'als_hdf5'):
+                    f = XTomoReader(real_file_name)
+                    tmpdata = f.hdf5(x_start=slices_start,
+                                        x_end=slices_end,
+                                        x_step=slices_step,
+                                        array_name='/'.join([file_name.split('&')[1], _file_name]))
 
                 elif (data_type is 'compressed_tiff'):
                     tmpdata = f.tiffc(x_start=slices_start,
@@ -753,12 +802,13 @@ class Import():
                     (data_type is 'compressed_tiff') or
                     (data_type is 'hdf4') or 
                     (data_type is 'edf2') or
-                    (data_type is 'hdf5')):
+                    (data_type is 'hdf5') or
+                    (data_type is 'als_hdf5')):
                     if m == 0: # Get resolution once.
-                        input_data = np.empty((len(ind),
-                                             tmpdata.shape[0],
-                                             tmpdata.shape[1]),
-                                             dtype=dtype)
+                        if (data_type is 'als_hdf5'):
+                            input_data = np.empty((len(ind), tmpdata.shape[1], tmpdata.shape[2]), dtype=dtype)
+                        else:
+                            input_data = np.empty((len(ind), tmpdata.shape[0], tmpdata.shape[1]), dtype=dtype)
                     input_data[m, :, :] = tmpdata
 
                 if ((data_type is 'spe') or
