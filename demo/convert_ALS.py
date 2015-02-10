@@ -22,6 +22,12 @@ import dataexchange
 import h5py
 import re
 
+
+"""
+def find_dataset(name):
+Enables recursive visits to find dataset within subgroups of h5 file 
+"""
+
 def find_dataset(name):
     """ Find first object with '20150130_065956_AX1_Jan15_x00y00' anywhere in the file """
     if '20150130_065956_AX1_Jan15_x00y00' in name:
@@ -135,8 +141,6 @@ def main():
             if 'num_dark_fields' in keys:
                 DarkEnd = dset.attrs[keys]
                 if verbose: print 'DarkEnd', DarkEnd
-
-    f.close()
     
     dark_start = 0
     dark_end = int(DarkEnd)
