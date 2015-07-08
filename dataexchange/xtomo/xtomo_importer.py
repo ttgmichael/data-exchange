@@ -183,7 +183,7 @@ class Import():
             set when reading Data Exchange HDF5 files
             exchange rank is added to "exchange" to point tomopy to the data to recontruct.
             if rank is not set then the data are raw from the detector and are located under
-            exchange = "exchange/...", to process data that are the result of some intermediate 
+            exchange = "exchange/...", to process data that are the result of some intermediate
             processing step then exchange_rank = 1 will direct tomopy to process "exchange1/..."
 
         Returns
@@ -194,6 +194,7 @@ class Import():
         projection_exist = False
         dark_exist = False
         white_exist = False
+        norm = False
 
         if (projections_digits == -1):
             # Set default dark/white file names
@@ -241,14 +242,36 @@ class Import():
                 dark_file_name.endswith('hdf'):
                 data_file_dark = os.path.splitext(dark_file_name)[0]
 
+
         elif (data_type is 'als_hdf5'):
-            data_file = os.path.split(file_name)[1]
-            if '.h5&' in data_file: 
-                data_file = data_file.split('&')[1]
-            real_file_name = file_name.split('&')[0]
-            dataExtension = ".tif"
-            data_file_white = white_file_name
-            data_file_dark = dark_file_name
+            if 'tif' in file_name:
+                print "file_name =", file_name
+                if 'normalized' or 'crop_combine' in file_name:
+                    norm = True
+                    dataExtension = ".tif"
+                    data_file = file_name.split('.')[0]
+                    print "DataFile =", data_file
+                    dtype = 'float32';
+                else:
+                    norm = False
+                    dataExtension = ".tif"
+                    data_file = file_name.split('.')[0]
+                    #print "DataFile =", data_file
+                    #print "file_name =", file_name
+                    data_file_white = file_name.split('.')[0] + 'bak_'
+                    data_file_dark = file_name.split('.')[0] + 'drk_'
+
+            elif 'h5' in file_name:             
+                data_file = os.path.split(file_name)[1]
+                if '.h5&' in data_file: 
+                    data_file = data_file.split('&')[1]
+                #print "DataFile =", data_file
+                real_file_name = file_name.split('&')[0]
+                dataExtension = ".tif"
+                data_file_white = white_file_name
+                #print "DataWhiteFile =", data_file_white
+                data_file_dark = dark_file_name
+                #print "DataDarkFile =", data_file_dark
             
         elif (data_type is 'nxs'):
             if file_name.endswith('NXS') or \
@@ -295,9 +318,12 @@ class Import():
             if white_file_name.endswith('tif') or \
                 white_file_name.endswith('tiff'):
                 data_file_white = os.path.splitext(white_file_name)[0]
+                #print data_file_white
             if dark_file_name.endswith('tif') or \
                 dark_file_name.endswith('tiff'):
                 data_file_dark = os.path.splitext(dark_file_name)[0]
+                #print data_file_dark
+
 
         elif (data_type is 'edf'):
             if file_name.endswith('EDF') or \
@@ -339,7 +365,7 @@ class Import():
             if exchange_rank > 0:
                 exchange_base = 'exchange{:d}'.format(int(exchange_rank))
             else:
-                exchange_base = "exchange"     
+                exchange_base = "exchange"
 
             if file_name.endswith('H5') or \
                 file_name.endswith('h5'):
@@ -364,7 +390,7 @@ class Import():
                 dark_file_name.endswith('xrm'):
                 data_file_dark = os.path.splitext(dark_file_name)[0]
 
-        
+
         projections_file_index = ["" for x in range(projections_digits)]
         for m in range(projections_digits):
             if projections_zeros is True:
@@ -397,14 +423,21 @@ class Import():
         for m in range(len(ind)):
             for n in range(projections_digits):
                 if ind[m] < np.power(10, n+1):
-                    if (data_type is 'als_hdf5'):
+                    if (data_type is 'als_hdf5') and ('.h5' in file_name):
                         _file_name = data_file + '_0000_' + projections_file_index[n] + str(ind[m]) + dataExtension
+                        #print "_file_name =", _file_name
+                    elif (data_type is 'als_hdf5') and (norm):
+                        _file_name = data_file + str(ind[m]) + dataExtension 
+                        #print "_file_name =", _file_name
+                    elif (data_type is 'als_hdf5') and (not norm):
+                        _file_name = data_file + '_0000_' + projections_file_index[n] + str(ind[m]) + dataExtension 
+                        #print "_file_name =", _file_name
                     else:
                         _file_name = data_file + projections_file_index[n] + str(ind[m]) + dataExtension
                     self.logger.info("Generating projection file names: [%s]", _file_name)
                     break
 
-            if (os.path.isfile(_file_name) or (dataExtension is '.tif')):
+            if (os.path.isfile(_file_name) or (data_type is 'als_hdf5')):
                 projection_exist = True
                 self.logger.info("Reading projection file: [%s]", os.path.realpath(_file_name))
                 self.logger.info("data type: [%s]", data_type)
@@ -423,15 +456,21 @@ class Import():
                                      array_name='/entry/data/data')
 
                 elif (data_type is 'als_hdf5'):
-                    f = XTomoReader(real_file_name)
-                    #print real_file_name
-                    #print data_file
-                    array_name='/'.join([file_name.split('&')[1], _file_name])
-                    #print array_name
-                    tmpdata = f.hdf5(x_start=slices_start,
-                                     x_end=slices_end,
-                                     x_step=slices_step,
-                                     array_name='/'.join([file_name.split('&')[1], _file_name]))
+                    if '.tif' in file_name:
+                        tmpdata = f.tiff(x_start=slices_start,
+                                         x_end=slices_end,
+                                         x_step=slices_step,
+                                         dtype=dtype)
+                    if '.h5' in file_name:
+                        f = XTomoReader(real_file_name)
+                        #print real_file_name
+                        #print data_file
+                        array_name='/'.join([file_name.split('&')[1], _file_name])
+                        #print array_name
+                        tmpdata = f.hdf5(x_start=slices_start,
+                                         x_end=slices_end,
+                                         x_step=slices_step,
+                                         array_name='/'.join([file_name.split('&')[1], _file_name]))
 
                 elif (data_type is 'compressed_tiff'):
                     tmpdata = f.tiffc(x_start=slices_start,
@@ -448,7 +487,7 @@ class Import():
                     tmpdata = f.netcdf(y_start = slices_start,
                                     y_end = slices_end,
                                     y_step = slices_step)
- 
+
                 elif (data_type is 'tiff'):
                     tmpdata = f.tiff(x_start=slices_start,
                                      x_end=slices_end,
@@ -467,7 +506,7 @@ class Import():
                     (data_type is 'hdf5') or
                     (data_type is 'als_hdf5')):
                     if m == 0: # Get resolution once.
-                        if (data_type is 'als_hdf5'):
+                        if (data_type is 'als_hdf5') and 'h5' in file_name:
                             input_data = np.empty((len(ind), tmpdata.shape[1], tmpdata.shape[2]), dtype=dtype)
                         else:
                             input_data = np.empty((len(ind), tmpdata.shape[0], tmpdata.shape[1]), dtype=dtype)
@@ -486,11 +525,12 @@ class Import():
             dtype = input_data.dtype
 
         else:
-            self.logger.info("Attempt reading projections from: [%s]", file_name)                    
+            self.logger.info("Attempt reading projections from: [%s]", file_name)
+
             if (data_type is 'h5'):
                 # Read the projections that are all in a single file
                 if os.path.isfile(file_name):
-                    self.logger.info("Projection file: [%s] exists", file_name)                    
+                    self.logger.info("Projection file: [%s] exists", file_name)
                     f = XTomoReader(file_name)
                     array_name = '/'.join([exchange_base, "data"])
                     tmpdata = f.hdf5(z_start = projections_start,
@@ -504,10 +544,11 @@ class Import():
                                     	x_step = pixels_step,
                                     	array_name= array_name)
                     self.data = tmpdata
+
             elif (data_type is 'nxs'):
                 # Read the projections that are all in a single file
                 if os.path.isfile(file_name):
-                    self.logger.info("Projection file: [%s] exists", file_name)                    
+                    self.logger.info("Projection file: [%s] exists", file_name)
                     f = XTomoReader(file_name)
                     array_type = 'projections'
                     tmpdata = f.nxs(z_start = projections_start,
@@ -524,7 +565,7 @@ class Import():
             elif (data_type is 'edf'):
                 # Read the projections that are all in a single file
                 if os.path.isfile(file_name):
-                    self.logger.info("Projection file: [%s] exists", file_name)                    
+                    self.logger.info("Projection file: [%s] exists", file_name)
                     f = XTomoReader(file_name)
                     tmpdata = f.edf(y_start = slices_start,
                                     y_end = slices_end,
@@ -533,17 +574,17 @@ class Import():
             elif (data_type is 'xradia'):
                 # Read the projections that are all in a single file
                 if os.path.isfile(file_name):
-                    self.logger.info("Projection file: [%s] exists", file_name)                    
+                    self.logger.info("Projection file: [%s] exists", file_name)
                     f = XTomoReader(file_name)
                     tmpdata = f.txrm(y_start = slices_start,
                                     y_end = slices_end,
                                     y_step = slices_step)
-                    dtype = tmpdata.dtype                    
+                    dtype = tmpdata.dtype
                     self.data = tmpdata
             elif (data_type is 'dpt'):
                 # Read the projections that are all in a single file
                 if os.path.isfile(file_name):
-                    self.logger.info("Projection file: [%s] exists", file_name)                    
+                    self.logger.info("Projection file: [%s] exists", file_name)
                     f = XTomoReader(file_name)
                     tmpdata = f.dpt(y_start = slices_start,
                                     y_end = slices_end,
@@ -551,7 +592,7 @@ class Import():
                     self.data = tmpdata
             else:
                 self.logger.error("Projection file is mandatory")
-            
+
         # White ------------------------------------------------
 
         # Reading white fields.
@@ -559,14 +600,17 @@ class Import():
         for m in range(len(ind)):
             for n in range(white_digits):
                 if ind[m] < np.power(10, n+1):
-                    if data_type is 'als_hdf5':
-                        _file_name = data_file_white + white_file_index[n] + str(ind[m]) + '_' + str(projections_end-1) + dataExtension
+                    if data_type is 'als_hdf5' and (projections_end-1 <1000):
+                        _file_name = data_file_white + white_file_index[n] + str(ind[m]) + '_0' + str(projections_end-1) + dataExtension
+                    elif (data_type is 'als_hdf5') and (projections_end-1 >= 1000):
+                        _file_name = data_file_white + white_file_index[n] + str(ind[m]) + '_' + str(projections_end-1) + dataExtension 
+                        #print "_file_name =", _file_name                    
                     else:
                         _file_name = data_file_white + white_file_index[n] + str(ind[m]) + dataExtension
                     self.logger.info("Generating white file names: [%s]", _file_name)
                     break
 
-            if (os.path.isfile(_file_name) or (dataExtension is '.tif')):
+            if (os.path.isfile(_file_name) or (data_type is 'als_hdf5')):
                 white_exist = True
                 self.logger.info("Reading white file: [%s]", os.path.realpath(_file_name))
                 self.logger.info("data type: [%s]", data_type)
@@ -586,11 +630,17 @@ class Import():
                                      array_name='data')
 
                 elif (data_type is 'als_hdf5'):
-                    f = XTomoReader(real_file_name)
-                    tmpdata = f.hdf5(x_start=slices_start,
-                                        x_end=slices_end,
-                                        x_step=slices_step,
-                                        array_name='/'.join([file_name.split('&')[1], _file_name]))
+                    if '.tif' in file_name:
+                        tmpdata = f.tiff(x_start=slices_start,
+                                         x_end=slices_end,
+                                         x_step=slices_step,
+                                         dtype=dtype)
+                    elif '.h5' in file_name:
+                        f = XTomoReader(real_file_name)
+                        tmpdata = f.hdf5(x_start=slices_start,
+                                         x_end=slices_end,
+                                         x_step=slices_step,
+                                         array_name='/'.join([file_name.split('&')[1], _file_name]))
 
                 elif (data_type is 'compressed_tiff'):
                     tmpdata = f.tiffc(x_start=slices_start,
@@ -627,11 +677,12 @@ class Import():
                     (data_type is 'hdf5') or
                     (data_type is 'als_hdf5')):
                     if m == 0: # Get resolution once.
-                        if (data_type is 'als_hdf5'):
+                        if (data_type is 'als_hdf5') and 'h5' in file_name:
                             input_data = np.empty((len(ind), tmpdata.shape[1], tmpdata.shape[2]), dtype=dtype)
                         else:
                             input_data = np.empty((len(ind), tmpdata.shape[0], tmpdata.shape[1]), dtype=dtype)
                     input_data[m, :, :] = tmpdata
+
 
                 if ((data_type is 'spe') or
                     (data_type is 'nc')):
@@ -644,11 +695,11 @@ class Import():
         if white_exist:
             self.data_white = input_data
         else:
-            self.logger.info("Attempt reading white from file: [%s]", file_name)                    
+            self.logger.info("Attempt reading white from file: [%s]", file_name)
             if (data_type is 'h5'):
                 # Read the whites that are all in a single file
                 if os.path.isfile(file_name):
-                    self.logger.info("White file: [%s] exists", file_name)                    
+                    self.logger.info("White file: [%s] exists", file_name)
                     f = XTomoReader(file_name)
                     tmpdata = f.hdf5(z_start = white_start,
                                     	z_end = white_end,
@@ -663,13 +714,13 @@ class Import():
                     self.data_white = tmpdata
                 else:
                     # Fabricate one white field
-                    self.logger.info("White file [%s]. Generating white fields", white_file_name)  
+                    self.logger.info("White file [%s]. Generating white fields", white_file_name)
                     nz, ny, nx = np.shape(self.data)
                     self.data_white = np.ones((1, ny, nx))
             elif (data_type is 'nxs'):
                 # Read the whites that are all in a single file
                 if os.path.isfile(file_name):
-                    self.logger.info("White file: [%s] exists", file_name)                    
+                    self.logger.info("White file: [%s] exists", file_name)
                     f = XTomoReader(file_name)
                     array_type = 'white'
                     tmpdata = f.nxs(z_start = white_start,
@@ -686,7 +737,7 @@ class Import():
             elif (data_type is 'edf'):
                 # Read the whites that are all in a single file
                 if os.path.isfile(white_file_name):
-                    self.logger.info("White file: [%s] exists", white_file_name)                    
+                    self.logger.info("White file: [%s] exists", white_file_name)
                     f = XTomoReader(white_file_name)
                     tmpdata = f.edf(y_start = slices_start,
                                     y_end = slices_end,
@@ -694,13 +745,13 @@ class Import():
                     self.data_white = tmpdata
                 else:
                     # Fabricate one white field
-                    self.logger.info("White file [%s]. Generating white fields", white_file_name)  
+                    self.logger.info("White file [%s]. Generating white fields", white_file_name)
                     nz, ny, nx = np.shape(self.data)
                     self.data_white = np.ones((1, ny, nx))
             elif (data_type is 'xradia'):
                 # Read the whites that are all in a single file
                 if os.path.isfile(white_file_name):
-                    self.logger.info("White file: [%s] exists", white_file_name)                    
+                    self.logger.info("White file: [%s] exists", white_file_name)
                     f = XTomoReader(white_file_name)
                     tmpdata = f.xrm(y_start = slices_start,
                                     y_end = slices_end,
@@ -708,13 +759,13 @@ class Import():
                     self.data_white = tmpdata
                 else:
                     # Fabricate one white field
-                    self.logger.info("White file [%s]. Generating white fields", white_file_name)  
+                    self.logger.info("White file [%s]. Generating white fields", white_file_name)
                     nz, ny, nx = np.shape(self.data)
                     self.data_white = np.ones((1, ny, nx),dtype=dtype)
             elif (data_type is 'dpt'):
                 # Read the whites that are all in a single file
                 if os.path.isfile(white_file_name):
-                    self.logger.info("White file: [%s] exists", white_file_name)                    
+                    self.logger.info("White file: [%s] exists", white_file_name)
                     f = XTomoReader(white_file_name)
                     tmpdata = f.dpt(y_start = slices_start,
                                     y_end = slices_end,
@@ -722,7 +773,7 @@ class Import():
                     self.data_white = tmpdata
                 else:
                     # Fabricate one white field
-                    self.logger.info("White file [%s]. Generating white fields", white_file_name)  
+                    self.logger.info("White file [%s]. Generating white fields", white_file_name)
                     nz, ny, nx = np.shape(self.data)
                     self.data_white = np.ones((1, ny, nx))
             else:
@@ -738,14 +789,17 @@ class Import():
         for m in range(len(ind)):
             for n in range(dark_digits):
                 if ind[m] < np.power(10, n + 1):
-                    if data_type is 'als_hdf5':
-                        _file_name = data_file_dark + dark_file_index[n] + str(ind[m]) + '_' + str(projections_end-1) + dataExtension
+                    if data_type is 'als_hdf5' and (projections_end-1 <1000):
+                        _file_name = data_file_dark + dark_file_index[n] + str(ind[m]) + '_0' + str(projections_end-1) + dataExtension
+                    elif (data_type is 'als_hdf5') and (projections_end-1 >= 1000):
+                        _file_name = data_file_dark + dark_file_index[n] + str(ind[m]) + '_' + str(projections_end-1) + dataExtension 
+                        #print "_file_name =", _file_name    
                     else:
                         _file_name = data_file_dark + dark_file_index[n] + str(ind[m]) + dataExtension
                     self.logger.info("Generating dark file names: [%s]", _file_name)
                     break
 
-            if (os.path.isfile(_file_name) or (dataExtension is '.tif')):
+            if (os.path.isfile(_file_name) or (data_type is 'als_hdf5')):
                 dark_exist = True
                 self.logger.info("Reading dark file: [%s]", os.path.realpath(_file_name))
                 self.logger.info("data type: [%s]", data_type)
@@ -765,11 +819,17 @@ class Import():
                                      array_name='data')
 
                 elif (data_type is 'als_hdf5'):
-                    f = XTomoReader(real_file_name)
-                    tmpdata = f.hdf5(x_start=slices_start,
-                                        x_end=slices_end,
-                                        x_step=slices_step,
-                                        array_name='/'.join([file_name.split('&')[1], _file_name]))
+                    if '.tif' in file_name:
+                        tmpdata = f.tiff(x_start=slices_start,
+                                         x_end=slices_end,
+                                         x_step=slices_step,
+                                         dtype=dtype)
+                    elif '.h5' in file_name:
+                        f = XTomoReader(real_file_name)
+                        tmpdata = f.hdf5(x_start=slices_start,
+                                         x_end=slices_end,
+                                         x_step=slices_step,
+                                         array_name='/'.join([file_name.split('&')[1], _file_name]))
 
                 elif (data_type is 'compressed_tiff'):
                     tmpdata = f.tiffc(x_start=slices_start,
@@ -800,16 +860,17 @@ class Import():
 
                 if ((data_type is 'tiff') or
                     (data_type is 'compressed_tiff') or
-                    (data_type is 'hdf4') or 
+                    (data_type is 'hdf4') or
                     (data_type is 'edf2') or
                     (data_type is 'hdf5') or
                     (data_type is 'als_hdf5')):
                     if m == 0: # Get resolution once.
-                        if (data_type is 'als_hdf5'):
+                        if (data_type is 'als_hdf5') and 'h5' in file_name:
                             input_data = np.empty((len(ind), tmpdata.shape[1], tmpdata.shape[2]), dtype=dtype)
                         else:
                             input_data = np.empty((len(ind), tmpdata.shape[0], tmpdata.shape[1]), dtype=dtype)
                     input_data[m, :, :] = tmpdata
+
 
                 if ((data_type is 'spe') or
                     (data_type is 'nc')):
@@ -822,11 +883,11 @@ class Import():
         if dark_exist > 0:
             self.data_dark = input_data
         else:
-            self.logger.info("Attempt reading dark from file: [%s]", file_name)                    
+            self.logger.info("Attempt reading dark from file: [%s]", file_name)
             if (data_type is 'h5'):
                 # Read the dark fields that are all in a single file
                 if os.path.isfile(file_name):
-                    self.logger.info("Dark file: [%s] exists", file_name)                    
+                    self.logger.info("Dark file: [%s] exists", file_name)
                     f = XTomoReader(file_name)
                     tmpdata = f.hdf5(z_start = dark_start,
                                     	z_end = dark_end,
@@ -847,7 +908,7 @@ class Import():
             elif (data_type is 'nxs'):
                 # Read the projections that are all in a single file
                 if os.path.isfile(file_name):
-                    self.logger.info("Dark file: [%s] exists", file_name)                    
+                    self.logger.info("Dark file: [%s] exists", file_name)
                     f = XTomoReader(file_name)
                     array_type = 'dark'
                     tmpdata = f.nxs(z_start = dark_start,
@@ -864,7 +925,7 @@ class Import():
             elif (data_type is 'edf'):
                 # Read the dark fields that are all in a single file
                 if os.path.isfile(dark_file_name):
-                    self.logger.info("Dark file: [%s] exists", dark_file_name)                    
+                    self.logger.info("Dark file: [%s] exists", dark_file_name)
                     f = XTomoReader(dark_file_name)
                     tmpdata = f.edf(y_start = slices_start,
                                     y_end = slices_end,
@@ -878,7 +939,7 @@ class Import():
             elif (data_type is 'xradia'):
                 # Read the dark fields that are all in a single file
                 if os.path.isfile(dark_file_name):
-                    self.logger.info("Dark file: [%s] exists", dark_file_name)                    
+                    self.logger.info("Dark file: [%s] exists", dark_file_name)
                     f = XTomoReader(dark_file_name)
                     tmpdata = f.xrm(y_start = slices_start,
                                     y_end = slices_end,
@@ -892,7 +953,7 @@ class Import():
             elif (data_type is 'dpt'):
                 # Read the dark fields that are all in a single file
                 if os.path.isfile(dark_file_name):
-                    self.logger.info("Dark file: [%s] exists", dark_file_name)                    
+                    self.logger.info("Dark file: [%s] exists", dark_file_name)
                     f = XTomoReader(dark_file_name)
                     tmpdata = f.dpt(y_start = slices_start,
                                     y_end = slices_end,
@@ -909,35 +970,35 @@ class Import():
                 nz, ny, nx = np.shape(self.data)
                 self.data_dark = np.zeros((1, ny, nx), dtype=dtype)
         # Theta ------------------------------------------------
-	if (data_type is 'h5'):
-		self.logger.info("Attempt reading angles from file: [%s]", file_name)                    
-		f = XTomoReader(file_name)
-		self.logger.info("Angle file: [%s] exists", file_name) 
-                array_name = '/'.join([exchange_base, "theta"])                   
-		tmpdata = f.hdf5(z_start = projections_start, 
-                        z_end = projections_end,
-                        z_step = projections_step,
-                        y_start = slices_start,
-                        y_end = slices_end,
-                        y_step = slices_step,
-                        array_name=array_name)
-		self.theta = tmpdata
-	elif (data_type is 'xradia'):
-		self.logger.info("Attempt reading angles from file: [%s]", file_name)                    
-		f = XTomoReader(file_name)
-        	self.logger.info("Angle file: [%s] exists", file_name)                    
-		tmpdata = f.txrm(array_name='theta')
-		self.theta = tmpdata
-	else:
-	        # Fabricate theta values
-        	nz, ny, nx = np.shape(self.data)
-        	z = np.arange(nz)
-        	self.logger.warning("Angle file missing")                    
-        	self.logger.warning("Generating angles")                    
+	    if (data_type is 'h5'):
+		    self.logger.info("Attempt reading angles from file: [%s]", file_name)
+		    f = XTomoReader(file_name)
+		    self.logger.info("Angle file: [%s] exists", file_name)
+                    array_name = '/'.join([exchange_base, "theta"])
+		    tmpdata = f.hdf5(z_start = projections_start,
+                            z_end = projections_end,
+                            z_step = projections_step,
+                            y_start = slices_start,
+                            y_end = slices_end,
+                            y_step = slices_step,
+                            array_name=array_name)
+		    self.theta = tmpdata
+	    elif (data_type is 'xradia'):
+		    self.logger.info("Attempt reading angles from file: [%s]", file_name)
+		    f = XTomoReader(file_name)
+        	    self.logger.info("Angle file: [%s] exists", file_name)
+		    tmpdata = f.txrm(array_name='theta')
+		    self.theta = tmpdata
+	    else:
+	            # Fabricate theta values
+        	    nz, ny, nx = np.shape(self.data)
+        	    z = np.arange(nz)
+        	    self.logger.warning("Angle file missing")
+        	    self.logger.warning("Generating angles")
 
-        	projections_angle_range = projections_angle_end - projections_angle_start
-        	self.theta = (z * float(projections_angle_range) / (len(z)))
-
+        	    projections_angle_range = projections_angle_end - projections_angle_start
+        	    self.theta = -(z * float(projections_angle_range) / (len(z)))
+        
         return self.data, self.data_white, self.data_dark, self.theta
 
     def _init_logging(self, stream_handler):
